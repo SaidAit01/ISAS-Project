@@ -41,7 +41,7 @@ Database: PostgreSQL (Production), SQLite (Dev)
 Algorithm: Gale-Shapley (Hospitals/Residents variant)
 
 ### 📂 Project Structure
-
+```
 ISAS-Project/
 ├── backend/                # Django Project Root
 │   ├── core/               # Main Application Logic (Models, Views)
@@ -55,6 +55,7 @@ ISAS-Project/
 ├── docs/                   # Documentation & UML Diagrams
 ├── simulation/             # Synthetic Data Generation Scripts
 └── README.md
+```
 
 
 ### 🧪 Evaluation Methodology
