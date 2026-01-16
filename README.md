@@ -1,8 +1,8 @@
-intelligent Supervisor Allocation System (ISAS)
+## intelligent Supervisor Allocation System (ISAS)
 
 Full Title: Design and Evaluation of an Intelligent Supervisor Allocation System (ISAS): Integrating Semantic Textual Similarity with a Comparative Analysis of Preference-Based Allocation Algorithms for Optimising Undergraduate Project Assignment.
 
-📌 Project Overview
+### 📌 Project Overview
 
 ISAS is a full-stack, AI-assisted decision-support system designed to automate and optimize the allocation of final-year undergraduate students to dissertation supervisors.
 
@@ -16,7 +16,7 @@ Subjective Agency: Incorporates explicit student preferences (Ranked Top 3 Choic
 
 Algorithmic Stability: Implements the Hospitals/Residents (HR) algorithm (a variant of Gale-Shapley) to guarantee a stable, capacity-compliant allocation.
 
-🚀 Key Features
+### 🚀 Key Features
 
 Student Portal (React): Interface for students to submit project proposals and rank their preferred supervisors.
 
@@ -28,7 +28,7 @@ Stable Allocation Engine: Ensures mathematically stable matches where no student
 
 Draft & Publish Workflow: Allows admins to review allocation results in "Draft Mode" before publishing them to students.
 
-🛠️ Technical Stack
+### 🛠️ Technical Stack
 
 Backend: Python, Django, Django Rest Framework (DRF)
 
@@ -40,7 +40,7 @@ Database: PostgreSQL (Production), SQLite (Dev)
 
 Algorithm: Gale-Shapley (Hospitals/Residents variant)
 
-📂 Project Structure
+### 📂 Project Structure
 
 ISAS-Project/
 ├── backend/                # Django Project Root
@@ -57,7 +57,7 @@ ISAS-Project/
 └── README.md
 
 
-🧪 Evaluation Methodology
+### 🧪 Evaluation Methodology
 
 This project employs an offline evaluation methodology using synthetic data.
 
@@ -67,7 +67,7 @@ Metrics: Stability (Blocking Pairs), Student Satisfaction (Rank Distribution), a
 
 Goal: To scientifically benchmark the Hybrid Algorithm against standard Greedy and Genetic approaches.
 
-📜 License
+### 📜 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
