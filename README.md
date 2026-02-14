@@ -41,22 +41,47 @@ Database: PostgreSQL (Production), SQLite (Dev)
 Algorithm: Gale-Shapley (Hospitals/Residents variant)
 
 ### 📂 Project Structure
-```
-ISAS-Project/
-├── backend/                # Django Project Root
-│   ├── core/               # Main Application Logic (Models, Views)
-│   ├── api/                # REST API Endpoints
-│   ├── algorithms/         # The "Brain" (SBERT & Allocation Scripts)
-│   └── manage.py
-├── frontend/               # React Application
-│   ├── src/
-│   ├── public/
-│   └── package.json
-├── docs/                   # Documentation & UML Diagrams
-├── simulation/             # Synthetic Data Generation Scripts
-└── README.md
-```
 
+```
+ISAS_Project/
+│
+├── manage.py                # The command center
+├── requirements.txt         # List your dependencies (sentence-transformers, django, etc.)
+│
+├── config/                  # (Renamed from the default project name folder for clarity)
+│   ├── __init__.py
+│   ├── settings.py          # ALL configuration goes here
+│   ├── urls.py              # Main URL routing
+│   ├── wsgi.py
+│   └── asgi.py
+│
+├── users/                   # APP 1: Authentication & Roles
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py            # CustomUser (AbstractUser), StudentProfile, SupervisorProfile
+│   ├── views.py
+│   └── urls.py
+│
+├── allocation/              # APP 2: The Core Logic (Where our algorithm lives)
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py            # Proposal, PreferenceList, AllocationResult
+│   ├── services.py          # <--- SBERT LOGIC GOES HERE (Block 1)
+│   ├── algorithms.py        # <--- SPA LOGIC GOES HERE (Block 3)
+│   ├── views.py
+│   └── urls.py
+│
+├── templates/               # HTML Files
+│   ├── base.html
+│   ├── users/
+│   └── allocation/
+│
+└── static/                  # CSS, JS, Images
+    ├── css/
+    └── js/
+```
 
 ### 🧪 Evaluation Methodology
 
