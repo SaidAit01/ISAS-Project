@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios'; // The tool used to talk to Django
+import ResultsTable from './ResultsTable';
 
 const AllocationRunner = () => {
     // --- STATE MANAGEMENT (The Memory) ---
@@ -18,9 +19,9 @@ const AllocationRunner = () => {
         try {
             // This is the specific URL for your Django View
             const response = await axios.get('http://127.0.0.1:8000/allocation/run-algo/');
-            
+
             // If successful, save the data to Memory
-            setResults(response.data); 
+            setResults(response.data);
         } catch (err) {
             setError("Failed to connect to the Allocation Engine.");
             console.error(err);
@@ -34,10 +35,10 @@ const AllocationRunner = () => {
         <div className="card p-4 shadow-sm">
             <h3>Allocation Control</h3>
             <p>Click below to trigger the SPA + AI Algorithm.</p>
-            
-            <button 
-                className="btn btn-primary" 
-                onClick={runAlgorithm} 
+
+            <button
+                className="btn btn-primary"
+                onClick={runAlgorithm}
                 disabled={loading} // Disable button if busy
             >
                 {loading ? "Running AI..." : "Run Allocation"}
@@ -53,7 +54,7 @@ const AllocationRunner = () => {
                         <strong>Status:</strong> {results.status}
                     </div>
                     {/* We will display the full table later. For now, just dump the text */}
-                    <pre>{JSON.stringify(results.matches, null, 2)}</pre>
+                    <ResultsTable matches={results.matches} />
                 </div>
             )}
         </div>
