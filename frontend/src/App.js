@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import DataEntry from './components/DataEntry';
+
 
 // Import our Lego Bricks
 import Navbar from './components/Navbar';
@@ -19,6 +21,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/allocation" element={<AllocationRunner />} />
+            <Route path="/add-student" element={<DataEntry />} />
           </Routes>
         </div>
       </div>
