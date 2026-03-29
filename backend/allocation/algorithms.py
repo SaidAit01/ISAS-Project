@@ -52,7 +52,7 @@ def generate_hybrid_preferences(student_choices, all_supervisors, ai_scores, n_l
 
     return preferences
 
-def spa_allocation(student_prefs, supervisor_prefs, capacities, supervisor_names):
+def spa_allocation(student_prefs, supervisor_prefs, capacities, supervisor_names, student_names):
     """
     Executes the Student-Project Allocation (SPA) algorithm.
     
@@ -75,6 +75,8 @@ def spa_allocation(student_prefs, supervisor_prefs, capacities, supervisor_names
     # Track which student is unmatched. Initially ALL are unmatched.
     # We use a Queue (list) for efficiency.
     unmatched_students = list(student_prefs.keys())
+    #List of unmatched students.
+    failed_students = []
     
     # Track where each student is in their preference list (0 = 1st choice, 1 = 2nd...)
     student_next_proposal_index = {s_id: 0 for s_id in unmatched_students}
@@ -86,11 +88,15 @@ def spa_allocation(student_prefs, supervisor_prefs, capacities, supervisor_names
         
         # Get their preference list
         my_prefs = student_prefs[student_id]
+
         
         # Check if they have run out of choices (Project Failure case)
         if student_next_proposal_index[student_id] >= len(my_prefs):
+            failed_students.append(student_id)
             unmatched_students.pop(0) # Remove them, they are unassigned
             continue
+    
+   
 
         # b. Get the supervisor they want to propose to
         sup_name_choice = my_prefs[student_next_proposal_index[student_id]]
@@ -156,6 +162,11 @@ def spa_allocation(student_prefs, supervisor_prefs, capacities, supervisor_names
     final_allocation = {}
     for sup_id, student_ids in matches.items():
         sup_name = supervisor_names[sup_id]
-        final_allocation[sup_name] = student_ids
-        
-    return final_allocation
+        final_allocation[sup_name] = [student_names[i] for i in student_ids]
+
+    unallocated_names = [student_names[i] for i in failed_students]
+
+    return {"matched": final_allocation, "unallocated": unallocated_names}
+
+
+    

@@ -1,51 +1,72 @@
 import numpy as np
 from sentence_transformers import SentenceTransformer, util
 
+# Load the SBERT model once when the server starts
 model = SentenceTransformer('all-MiniLM-L6-v2') 
 
-def calculate_academic_fit(student_proposals, supervisor_profiles):
+def calculate_hybrid_score(student, supervisor, sbert_score):
+
+    student_skills = set(student.programming_languages)
+    required_skills = set(supervisor.required_skills)
     
-    # 1. Encode all students at once (This is fine, they are short proposals)
-    student_vectors = model.encode(student_proposals)
+    if len(required_skills) == 0:
+        skill_score = 1.0
+    else:
+        skill_matches = student_skills.intersection(required_skills)
+        skill_score = len(skill_matches) / len(required_skills)
+        
+    student_categories = set(student.project_category)
+    suggested_categories = set(supervisor.suggested_project_categories)
     
+    if len(suggested_categories) == 0:
+        category_score = 1.0
+    else:
+        category_matches = student_categories.intersection(suggested_categories)
+        category_score = len(category_matches) / len(suggested_categories)
+        
+    final_hybrid_score = (sbert_score * 0.5) + (skill_score * 0.3) + (category_score * 0.2)
+    return final_hybrid_score
+
+
+def calculate_academic_fit(students, supervisors):
+    """
+    Takes the RAW lists of Django Student and Supervisor objects.
+    Returns a numpy matrix of the final hybrid scores.
+    """
     final_matrix = []
     
-    # 2. Loop through each student vector
-    # We use enumerate so we can get the vector directly
-    for student_vec in student_vectors:
+    # 1. Loop through every student
+    for student in students:
+        student_scores = []
         
-        student_scores_against_supervisors = []
+        # Encode the student's topic description ONCE
+        student_vector = model.encode(student.topic_description)
         
-        # 3. Loop through the RAW text of each supervisor
-        for supervisor_text in supervisor_profiles:
+        # 2. Loop through every supervisor for this student
+        for supervisor in supervisors:
             
-            # --- THE CHUNKING PROCESS ---
+            # --- SBERT PHASE ---
+            # TODO: The supervisor's research_interests is ALREADY a list of strings!
+            # 1. Encode supervisor.research_interests into 'chunk_vectors'
+            # 2. Use util.cos_sim to compare student_vector against chunk_vectors
+            # 3. Find the maximum score from the tensor and save it as 'sbert_score'
+            chunk_vectors = model.encode(supervisor.research_interests)
+            sbert_tensor = util.cos_sim(student_vector, chunk_vectors)
+            sbert_score = sbert_tensor.max().item()
             
-            # a. Split the supervisor_text by commas to create a list of chunks
-            # Hint: use the .split(',') method
-            chunks = supervisor_text.split(',')
             
-            # b. Clean the chunks (remove accidental empty spaces)
-            # I will give you this line as it's a Python list comprehension trick:
-            clean_chunks = [c.strip() for c in chunks if c.strip()]
+            # --- HYBRID PHASE ---
+            # TODO: Pass the student object, supervisor object, and the sbert_score 
+            # you just calculated into the calculate_hybrid_score function.
+            # Save the result as 'final_score'
+            final_score = calculate_hybrid_score(student, supervisor, sbert_score)
             
-            # c. Now, encode these clean_chunks into vectors!
-            chunk_vectors = model.encode(clean_chunks)
             
-            # d. Calculate Cosine Similarity between the ONE student_vec 
-            # and the MULTIPLE chunk_vectors. 
-            scores = util.cos_sim(student_vec, chunk_vectors)[0] # [0] to get the first row, which is our student_vec against all chunks
+            # --- APPEND PHASE ---
+            # TODO: Append 'final_score' to the student_scores list
+            student_scores.append(final_score)
             
-            # e. Find the MAXIMUM score from that comparison
-            # Hint: Since 'scores' is a PyTorch tensor, you can use scores.max().item()
-            highest_score = scores.max().item()
-            
-            # f. Append this highest score to our list for this student
-            student_scores_against_supervisors.append(highest_score)
-            
-        # 4. We have finished checking all supervisors for this student. 
-        # Append their list of scores to the main matrix.
-        final_matrix.append(student_scores_against_supervisors)
+        # 3. Append the student's completed row to the final matrix
+        final_matrix.append(student_scores)
         
-    # 5. Convert the final python list of lists into a numpy array and return it
     return np.array(final_matrix)

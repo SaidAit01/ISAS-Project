@@ -8,26 +8,26 @@ from django.views.decorators.csrf import csrf_exempt
 def run_allocation_algorithm(request):
     #  Fetch Data from the db
     supervisors = list(SupervisorProfile.objects.all())
-    students = list(StudentProposal.objects.all())
+    students = list(StudentProposal.objects.filter(has_submitted=True))
+    #Fetch the ghost students
+    pending_students = list(StudentProposal.objects.filter(has_submitted=False))
+    pending_names = [s.name for s in pending_students]
     
     if not supervisors or not students:
         return JsonResponse({"error": "No data found. Add supervisors and students first."}, status=400)
 
     
-    # Extract just the text for SBERT
-    student_texts = [s.topic_description for s in students]
-    supervisor_texts = [s.research_interests for s in supervisors]
-    
     # Extract names and choices for the Algorithms
     supervisor_names = [s.name for s in supervisors]
     student_choices = [s.manual_preferences for s in students]
+    student_names = [s.name for s in students]
     
     # Create a capacity dictionary { 'Dr. Smith': 5, ... }
     capacities = {s.name: s.capacity for s in supervisors}
 
    
     # This calls the SBERT function
-    score_matrix = calculate_academic_fit(student_texts, supervisor_texts)
+    score_matrix = calculate_academic_fit(students, supervisors)
 
    
     # This calls the Hybrid List function
@@ -46,16 +46,18 @@ def run_allocation_algorithm(request):
 
     # 5. EXECUTE ALLOCATION (Block 3)
     final_matches = spa_allocation(
-        student_prefs_dict,      # <--- Pass the new Dictionary
-        supervisor_prefs_dict,   # <--- Pass the new Dictionary
+        student_prefs_dict,      
+        supervisor_prefs_dict,   
         capacities,
-        supervisor_names
+        supervisor_names, 
+        student_names
     )
 
 
     return JsonResponse({
         "status": "success",
         "matches": final_matches,
+        "pending": pending_names,
         "debug_preferences": preference_data # Helpful for seeing what the AI thought
     })
 @csrf_exempt
@@ -69,11 +71,7 @@ def add_student_api(request):
                 "status": "error", 
                 "message": f"Topic description is too long. Please limit to 200 words (currently {word_count} words)."
             }, status=400)
-            if word_count < 50: 
-                return JsonResponse({
-                "status": "error", 
-                "message": f"Topic description is too short. Please provide at least 50 words (currently {word_count} words)."
-            }, status=400)
+    
         
             preferences = data.get('preferences', [])
             

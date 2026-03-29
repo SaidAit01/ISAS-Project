@@ -4,7 +4,10 @@ from django.db import models
 # models containd the essentisl fields and behaviour of the data
 class SupervisorProfile(models.Model) : 
     name = models.CharField(max_length=100)
-    research_interests = models.TextField() 
+    research_interests = models.JSONField(default=list) 
+    suggested_projects = models.JSONField(default=list)
+    required_skills = models.JSONField(default=list)
+    suggested_project_categories = models.JSONField(default=list)
     capacity = models.IntegerField(default=5)
 
     def __str__(self):
@@ -13,7 +16,11 @@ class SupervisorProfile(models.Model) :
 class StudentProposal (models.Model) : 
     name = models.CharField(max_length=100)
     topic_description = models.TextField()
+    student_research_interests = models.JSONField(default=list)
+    programming_languages = models.JSONField(default=list)
+    project_category = models.JSONField(default=list)
     manual_preferences= models.JSONField(default=list)
+    has_submitted = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
