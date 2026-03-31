@@ -1,13 +1,15 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import DataEntry from './components/DataEntry';
-
-
-// Import our Lego Bricks
+import StudentWizard from './components/StudentProposal';
 import Navbar from './components/Navbar';
 import Home from './components/Home';
 import AllocationRunner from './components/AllocationRunner';
+import SupervisorDashboard from './components/SupervisorDashboard';
+import SupervisorDirectory from './components/SupervisorDirectory';
+import StudentProposal from './components/StudentProposal';
+
+
 
 function App() {
   return (
@@ -21,7 +23,9 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/allocation" element={<AllocationRunner />} />
-            <Route path="/add-student" element={<DataEntry />} />
+            <Route path="/add-student" element={<StudentProposal />} />
+            <Route path="/supervisor" element={<SupervisorDashboard />} />
+            <Route path="/directory" element={<SupervisorDirectory />} />
           </Routes>
         </div>
       </div>

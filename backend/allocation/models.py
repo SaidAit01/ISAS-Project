@@ -7,20 +7,39 @@ class SupervisorProfile(models.Model) :
     research_interests = models.JSONField(default=list) 
     suggested_projects = models.JSONField(default=list)
     required_skills = models.JSONField(default=list)
-    suggested_project_categories = models.JSONField(default=list)
+    project_categories = models.JSONField(default=list)
     capacity = models.IntegerField(default=5)
 
     def __str__(self):
         return self.name
 
-class StudentProposal (models.Model) : 
+class StudentProposal(models.Model):
     name = models.CharField(max_length=100)
     topic_description = models.TextField()
     student_research_interests = models.JSONField(default=list)
     programming_languages = models.JSONField(default=list)
     project_category = models.JSONField(default=list)
-    manual_preferences= models.JSONField(default=list)
+    manual_preferences = models.JSONField(default=list)
     has_submitted = models.BooleanField(default=False)
+    
+    # Existing allocation field (where the algorithm puts its final answers)
+    allocated_supervisor = models.ForeignKey(
+        'SupervisorProfile', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='allocated_students'
+    )
+
+    has_pre_agreement = models.BooleanField(default=False)
+    pre_agreed_supervisor = models.ForeignKey(
+        'SupervisorProfile', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='pre_agreements',
+        help_text="The specific academic the student has a prior arrangement with."
+    )
 
     def __str__(self):
         return self.name

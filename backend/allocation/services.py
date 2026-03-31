@@ -16,7 +16,8 @@ def calculate_hybrid_score(student, supervisor, sbert_score):
         skill_score = len(skill_matches) / len(required_skills)
         
     student_categories = set(student.project_category)
-    suggested_categories = set(supervisor.suggested_project_categories)
+    # CRITICAL FIX: Updated to match the new models.py column name!
+    suggested_categories = set(supervisor.project_categories)
     
     if len(suggested_categories) == 0:
         category_score = 1.0
@@ -46,24 +47,14 @@ def calculate_academic_fit(students, supervisors):
         for supervisor in supervisors:
             
             # --- SBERT PHASE ---
-            # TODO: The supervisor's research_interests is ALREADY a list of strings!
-            # 1. Encode supervisor.research_interests into 'chunk_vectors'
-            # 2. Use util.cos_sim to compare student_vector against chunk_vectors
-            # 3. Find the maximum score from the tensor and save it as 'sbert_score'
             chunk_vectors = model.encode(supervisor.research_interests)
             sbert_tensor = util.cos_sim(student_vector, chunk_vectors)
             sbert_score = sbert_tensor.max().item()
             
-            
             # --- HYBRID PHASE ---
-            # TODO: Pass the student object, supervisor object, and the sbert_score 
-            # you just calculated into the calculate_hybrid_score function.
-            # Save the result as 'final_score'
             final_score = calculate_hybrid_score(student, supervisor, sbert_score)
             
-            
             # --- APPEND PHASE ---
-            # TODO: Append 'final_score' to the student_scores list
             student_scores.append(final_score)
             
         # 3. Append the student's completed row to the final matrix
