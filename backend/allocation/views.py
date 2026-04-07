@@ -4,6 +4,8 @@ from .services import calculate_academic_fit
 from .algorithms import generate_hybrid_preferences, spa_allocation
 import json 
 from django.views.decorators.csrf import csrf_exempt
+import csv
+from django.http import HttpResponse
 
 def run_allocation_algorithm(request):
     # 1. Fetch Data
@@ -161,7 +163,9 @@ def add_student_api(request):
                     'programming_languages': data.get('programming_languages', []),
                     'project_category': data.get('project_category', []),
                     'manual_preferences': preferences,
-                    'has_submitted': True # CRITICAL: No longer a ghost!
+                    'has_submitted': True, 
+                    'has_pre_agreement': has_pre_agreement,
+                    'pre_agreed_supervisor': pre_agreed_obj, 
                 }
             )
             
@@ -392,4 +396,20 @@ def get_all_supervisors_api(request):
             return JsonResponse({"status": "error", "message": str(e)}, status=500)
             
     return JsonResponse({"status": "error", "message": "Invalid method"}, status=405)
+    
+def export_allocations_csv(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="final_allocations.csv"'
+    
+    writer = csv.writer(response)
+    writer.writerow(['Student Name', 'Student Proposal', 'Assigned Supervisor', 'Allocation Type'])
+
+    allocated_students = StudentProposal.objects.filter(allocated_supervisor__isnull=False).select_related('allocated_supervisor')
+
+    for student in allocated_students: 
+        match_type = "Pre-Agreed" if student.has_pre_agreement else "Algorithmic Decision"
+        writer.writerow([student.name, student.topic_description, student.allocated_supervisor.name, match_type])
+
+    return response
+    
     

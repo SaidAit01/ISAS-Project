@@ -1,11 +1,44 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import Select from 'react-select';
+import CreatableSelect from 'react-select/creatable';
+
+// --- TAXONOMY DEFINITIONS ---
+const FORMAT_OPTIONS = [
+    { value: 'Software Engineering', label: 'Software Engineering / System Development' },
+    { value: 'Applied Research', label: 'Applied Research & AI' },
+    { value: 'Data Science', label: 'Data Science & Analytics' },
+    { value: 'Theoretical CS', label: 'Theoretical Computer Science' },
+    { value: 'Hardware IoT', label: 'Hardware, IoT & Networking' },
+    { value: 'HCI', label: 'Human-Computer Interaction (HCI)' }
+];
+
+const SKILL_OPTIONS = [
+    { value: 'Python', label: 'Python' },
+    { value: 'Java', label: 'Java' },
+    { value: 'C++', label: 'C++' },
+    { value: 'React', label: 'React' },
+    { value: 'Node.js', label: 'Node.js' },
+    { value: 'Docker', label: 'Docker' },
+    { value: 'SQL', label: 'SQL' },
+    { value: 'Machine Learning', label: 'Machine Learning' },
+    { value: 'Data Analysis', label: 'Data Analysis' }
+];
+
+const INTEREST_OPTIONS = [
+    { value: 'Artificial Intelligence', label: 'Artificial Intelligence' },
+    { value: 'Cybersecurity', label: 'Cybersecurity' },
+    { value: 'Web Development', label: 'Web Development' },
+    { value: 'Cloud Computing', label: 'Cloud Computing' },
+    { value: 'Computer Vision', label: 'Computer Vision' },
+    { value: 'Robotics', label: 'Robotics' }
+];
 
 const SupervisorDashboard = () => {
     // --- AUTH / NAVIGATION STATE ---
     const [loginName, setLoginName] = useState("");
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [activeTab, setActiveTab] = useState("students"); // 'students' or 'profile'
+    const [activeTab, setActiveTab] = useState("students");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [successMsg, setSuccessMsg] = useState("");
@@ -15,10 +48,15 @@ const SupervisorDashboard = () => {
 
     // --- PROFILE FORM STATE ---
     const [capacity, setCapacity] = useState(3);
-    const [interests, setInterests] = useState("");
-    const [projects, setProjects] = useState("");
-    const [skills, setSkills] = useState("");
-    const [categories, setCategories] = useState("");
+    const [projects, setProjects] = useState(""); // Kept as text area based on your previous design
+    
+    // Updated to handle array objects for react-select
+    const [selectedInterests, setSelectedInterests] = useState([]);
+    const [selectedSkills, setSelectedSkills] = useState([]);
+    const [selectedFormats, setSelectedFormats] = useState([]);
+
+    // --- UI TOOLTIP STATE ---
+    const [showFormatHelp, setShowFormatHelp] = useState(false);
 
     // --- LOGIC: ENTER PORTAL ---
     const handleLogin = async (e) => {
@@ -27,25 +65,23 @@ const SupervisorDashboard = () => {
         setLoading(true); setError(null);
 
         try {
-            // 1. Try to fetch their profile
             try {
                 const profileRes = await axios.get(`http://127.0.0.1:8000/allocation/supervisor-profile/${encodeURIComponent(loginName)}/`);
                 if (profileRes.data.status === 'success') {
                     const p = profileRes.data.profile;
-                    // Pre-fill the form with their existing database info!
-                    setCapacity(p.capacity);
-                    setInterests(p.research_interests.join(", "));
+                    setCapacity(p.capacity || 3);
                     setProjects(p.suggested_projects?.join(", ") || "");
-                    setSkills(p.required_skills?.join(", ") || "");
-                    setCategories(p.project_categories?.join(", ") || "");
+                    
+                    // Map existing DB string arrays back to react-select objects
+                    setSelectedInterests(p.research_interests ? p.research_interests.map(i => ({value: i, label: i})) : []);
+                    setSelectedSkills(p.technical_skills ? p.technical_skills.map(s => ({value: s, label: s})) : []);
+                    setSelectedFormats(p.primary_project_format ? p.primary_project_format.map(f => ({value: f, label: f})) : []);
                 }
             } catch (err) {
-                // If it 404s, it means they are a NEW supervisor. We just leave the form blank.
                 setSuccessMsg("Welcome! It looks like you are a new supervisor. Please fill out your profile.");
-                setActiveTab("profile"); // Force them to the profile tab
+                setActiveTab("profile"); 
             }
 
-            // 2. Fetch their students (if any)
             try {
                 const studentRes = await axios.get(`http://127.0.0.1:8000/allocation/my-students/${encodeURIComponent(loginName)}/`);
                 if (studentRes.data.status === 'success') {
@@ -68,20 +104,20 @@ const SupervisorDashboard = () => {
         e.preventDefault();
         setLoading(true); setSuccessMsg(""); setError(null);
 
-        // Convert the comma-separated text into neat arrays for Django's JSON fields
+        // Map the react-select objects back to standard arrays and use the correct symmetric keys
         const payload = {
             name: loginName,
             capacity: parseInt(capacity),
-            research_interests: interests.split(',').map(s => s.trim()).filter(s => s),
             suggested_projects: projects.split(',').map(s => s.trim()).filter(s => s),
-            required_skills: skills.split(',').map(s => s.trim()).filter(s => s),
-            project_categories: categories.split(',').map(s => s.trim()).filter(s => s),
+            research_interests: selectedInterests.map(i => i.value),
+            technical_skills: selectedSkills.map(s => s.value),
+            primary_project_format: selectedFormats.map(f => f.value),
         };
 
         try {
             const response = await axios.post('http://127.0.0.1:8000/allocation/add-supervisor/', payload);
             if (response.data.status === 'success') {
-                setSuccessMsg(`Profile successfully ${response.data.action}! The AI engine now has your latest preferences.`);
+                setSuccessMsg(`Profile successfully saved! The AI engine now has your latest preferences.`);
             }
         } catch (err) {
             setError("Could not save profile. Check your connection.");
@@ -90,9 +126,6 @@ const SupervisorDashboard = () => {
         }
     };
 
-    // ==========================================
-    // UI: LOGIN SCREEN
-    // ==========================================
     if (!isLoggedIn) {
         return (
             <div className="container mt-5 max-w-2xl mx-auto">
@@ -115,9 +148,6 @@ const SupervisorDashboard = () => {
         );
     }
 
-    // ==========================================
-    // UI: LOGGED IN DASHBOARD
-    // ==========================================
     return (
         <div className="container mt-4 max-w-4xl mx-auto">
             <div className="d-flex justify-content-between align-items-center mb-4">
@@ -125,7 +155,6 @@ const SupervisorDashboard = () => {
                 <button className="btn btn-outline-danger btn-sm" onClick={() => setIsLoggedIn(false)}>Log Out</button>
             </div>
 
-            {/* TAB NAVIGATION */}
             <ul className="nav nav-tabs mb-4">
                 <li className="nav-item">
                     <button className={`nav-link fw-bold ${activeTab === 'students' ? 'active text-primary' : 'text-muted'}`} onClick={() => setActiveTab('students')}>
@@ -142,7 +171,6 @@ const SupervisorDashboard = () => {
             {successMsg && <div className="alert alert-success fw-bold">{successMsg}</div>}
             {error && <div className="alert alert-danger fw-bold">{error}</div>}
 
-            {/* TAB 1: VIEW STUDENTS */}
             {activeTab === 'students' && (
                 <div>
                     {allocatedStudents.length === 0 ? (
@@ -170,7 +198,6 @@ const SupervisorDashboard = () => {
                 </div>
             )}
 
-            {/* TAB 2: EDIT PROFILE */}
             {activeTab === 'profile' && (
                 <div className="card shadow-sm p-4 border-0 bg-white">
                     <form onSubmit={handleSaveProfile}>
@@ -181,24 +208,63 @@ const SupervisorDashboard = () => {
                         </div>
 
                         <div className="row">
-                            <div className="col-md-6 mb-3">
+                            <div className="col-md-12 mb-3">
                                 <label className="form-label fw-bold">Research Interests</label>
-                                <textarea className="form-control" rows="3" value={interests} onChange={(e) => setInterests(e.target.value)} placeholder="e.g., AI, Databases, Cloud Computing"></textarea>
+                                <CreatableSelect
+                                    isMulti
+                                    options={INTEREST_OPTIONS}
+                                    value={selectedInterests}
+                                    onChange={(opts) => setSelectedInterests(opts || [])}
+                                    placeholder="Type an interest and press Enter..."
+                                    formatCreateLabel={(val) => `Add "${val}"`}
+                                />
                             </div>
-                            <div className="col-md-6 mb-3">
-                                <label className="form-label fw-bold">Required Skills</label>
-                                <textarea className="form-control" rows="3" value={skills} onChange={(e) => setSkills(e.target.value)} placeholder="e.g., Python, SQL, React"></textarea>
+                            
+                            <div className="col-md-12 mb-3">
+                                <label className="form-label fw-bold">Required Technical Skills</label>
+                                <CreatableSelect
+                                    isMulti
+                                    options={SKILL_OPTIONS}
+                                    value={selectedSkills}
+                                    onChange={(opts) => setSelectedSkills(opts || [])}
+                                    placeholder="Type a skill/language and press Enter..."
+                                    formatCreateLabel={(val) => `Add "${val}"`}
+                                />
                             </div>
-                            <div className="col-md-6 mb-3">
+
+                            <div className="col-md-12 mb-3">
+                                <label className="form-label fw-bold d-flex align-items-center mb-2">
+                                    Primary Project Format
+                                    <span 
+                                        className="badge bg-light text-secondary border border-secondary ms-2 rounded-1" 
+                                        onClick={() => setShowFormatHelp(!showFormatHelp)}
+                                        style={{ cursor: "pointer", fontSize: "0.8rem", padding: "0.4em 0.6em" }}
+                                    >
+                                        ?
+                                    </span>
+                                </label>
+
+                                {showFormatHelp && (
+                                    <div className="alert alert-secondary py-2 px-3 mb-3 shadow-sm" style={{ fontSize: "0.85rem" }}>
+                                        <strong>System Matching Logic:</strong> Select the primary project modalities you are willing to supervise. The algorithm uses this as a strict filter to ensure you are only matched with students whose projects align with your methodological grading expertise.
+                                    </div>
+                                )}
+
+                                <Select
+                                    isMulti
+                                    options={FORMAT_OPTIONS}
+                                    value={selectedFormats}
+                                    onChange={(opts) => setSelectedFormats(opts || [])}
+                                    placeholder="Select standard project formats..."
+                                />
+                            </div>
+
+                            <div className="col-md-12 mb-4">
                                 <label className="form-label fw-bold">Suggested Projects</label>
                                 <textarea className="form-control" rows="3" value={projects} onChange={(e) => setProjects(e.target.value)} placeholder="e.g., Stock Prediction App, Database Engine"></textarea>
-                            </div>
-                            <div className="col-md-6 mb-3">
-                                <label className="form-label fw-bold">Project Categories</label>
-                                <textarea className="form-control" rows="3" value={categories} onChange={(e) => setCategories(e.target.value)} placeholder="e.g., Web App, Research, Machine Learning"></textarea>
+                                <div className="form-text">Note: Please separate multiple items with commas. This field is for student inspiration.</div>
                             </div>
                         </div>
-                        <div className="form-text mb-4 text-primary fw-bold">Note: Please separate multiple items with commas. Our system will format it automatically.</div>
 
                         <button type="submit" className="btn btn-success btn-lg w-100 fw-bold" disabled={loading}>
                             {loading ? "Saving..." : "💾 Save Supervisor Profile"}

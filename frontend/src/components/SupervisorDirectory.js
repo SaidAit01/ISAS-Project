@@ -96,9 +96,7 @@ const SupervisorDirectory = () => {
                                             </div>
                                         )}
                                     </div>
-                                    <div className="card-footer bg-white border-0 text-end">
-                                        <span className="text-muted small">Capacity: <strong>{sup.capacity}</strong> students</span>
-                                    </div>
+
                                 </div>
                             </div>
                         ))

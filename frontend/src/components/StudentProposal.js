@@ -1,5 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Select from 'react-select';
+import CreatableSelect from 'react-select/creatable';
+
+// --- 1. STRICT TAXONOMY DEFINITIONS ---
+// Define these outside the component to prevent re-rendering issues.
+const FORMAT_OPTIONS = [
+    { value: 'Software Engineering', label: 'Software Engineering / System Development' },
+    { value: 'Applied Research', label: 'Applied Research & AI' },
+    { value: 'Data Science', label: 'Data Science & Analytics' },
+    { value: 'Theoretical CS', label: 'Theoretical Computer Science' },
+    { value: 'Hardware IoT', label: 'Hardware, IoT & Networking' },
+    { value: 'HCI', label: 'Human-Computer Interaction (HCI)' }
+];
+
+const SKILL_OPTIONS = [
+    { value: 'Python', label: 'Python' },
+    { value: 'Java', label: 'Java' },
+    { value: 'C++', label: 'C++' },
+    { value: 'React', label: 'React' },
+    { value: 'Node.js', label: 'Node.js' },
+    { value: 'Docker', label: 'Docker' },
+    { value: 'SQL', label: 'SQL' },
+    { value: 'Machine Learning', label: 'Machine Learning' },
+    { value: 'Data Analysis', label: 'Data Analysis' }
+];
+
+const INTEREST_OPTIONS = [
+    { value: 'Artificial Intelligence', label: 'Artificial Intelligence' },
+    { value: 'Cybersecurity', label: 'Cybersecurity' },
+    { value: 'Web Development', label: 'Web Development' },
+    { value: 'Cloud Computing', label: 'Cloud Computing' },
+    { value: 'Computer Vision', label: 'Computer Vision' },
+    { value: 'Robotics', label: 'Robotics' }
+];
 
 const StudentProposal = () => {
 
@@ -7,19 +41,22 @@ const StudentProposal = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState('');
+    const [showFormatHelp, setShowFormatHelp] = useState(false);
 
     // --- 2. THE GLOBAL RULE STATE ---
     const [maxPrefs, setMaxPrefs] = useState(3);
 
-    // --- 3. FORM DATA STATE ---
+    // --- 3. FORM DATA STATE (UPDATED FOR ARRAYS) ---
     const [name, setName] = useState("");
     const [topic, setTopic] = useState("");
-    const [interestsInput, setInterestsInput] = useState("");
-    const [languagesInput, setLanguagesInput] = useState("");
-    const [categoryInput, setCategoryInput] = useState("");
+    
+    const [selectedInterests, setSelectedInterests] = useState([]);
+    const [selectedSkills, setSelectedSkills] = useState([]);
+    const [selectedFormats, setSelectedFormats] = useState([]);
+    
     const [finalPrefs, setFinalPrefs] = useState("");
 
-    // --- 4. NEW: PRE-AGREEMENT STATE ---
+    // --- 4. PRE-AGREEMENT STATE ---
     const [hasPreAgreement, setHasPreAgreement] = useState(false);
     const [selectedSupervisor, setSelectedSupervisor] = useState("");
     const [supervisorList, setSupervisorList] = useState([]);
@@ -30,7 +67,6 @@ const StudentProposal = () => {
     const wordCount = topic.trim() === '' ? 0 : topic.trim().split(/\s+/).length;
 
     useEffect(() => {
-        // Fetch global rules
         const fetchConfig = async () => {
             try {
                 const response = await axios.get('http://127.0.0.1:8000/allocation/config/');
@@ -42,7 +78,6 @@ const StudentProposal = () => {
             }
         };
 
-        // Fetch staff directory for the dropdown
         const fetchSupervisors = async () => {
             try {
                 const response = await axios.get('http://127.0.0.1:8000/allocation/directory/');
@@ -58,23 +93,33 @@ const StudentProposal = () => {
         fetchSupervisors();
     }, []);
 
+    // --- UI VALIDATION HANDLER ---
+    const handleFormatChange = (selectedOptions) => {
+        if (selectedOptions && selectedOptions.length > 2) {
+            alert("You may only select a maximum of two primary project formats.");
+        } else {
+            setSelectedFormats(selectedOptions || []);
+        }
+    };
+
     // --- ACTION 1: Get AI Suggestions (Standard Route) ---
     const handleGetSuggestions = async () => {
         setError(null);
 
         if (wordCount > 200) return setError(`Topic is too long. Limit: 200 words (currently ${wordCount}).`);
-        if (!topic.trim() && !interestsInput.trim() && !languagesInput.trim() && !categoryInput.trim()) {
-            return setError("Please provide a topic description or fill in some of the skills/category fields.");
+        if (!topic.trim() && selectedInterests.length === 0 && selectedSkills.length === 0 && selectedFormats.length === 0) {
+            return setError("Please provide a topic description or select some skills/formats.");
         }
 
         setLoading(true);
 
         try {
+            // Extract the string values from the react-select objects
             const combinedKeywords = [
-                ...interestsInput.split(','),
-                ...languagesInput.split(','),
-                ...categoryInput.split(',')
-            ].map(item => item.trim()).filter(item => item !== "");
+                ...selectedInterests.map(i => i.value),
+                ...selectedSkills.map(s => s.value),
+                ...selectedFormats.map(f => f.value)
+            ];
 
             const response = await axios.post('http://127.0.0.1:8000/allocation/suggest-supervisors/', {
                 topic: topic,
@@ -105,10 +150,10 @@ const StudentProposal = () => {
             const payload = {
                 name: name,
                 topic: topic,
-                interests: interestsInput.split(',').map(s => s.trim()).filter(s => s),
-                programming_languages: languagesInput.split(',').map(s => s.trim()).filter(s => s),
-                project_category: categoryInput.split(',').map(s => s.trim()).filter(s => s),
-                preferences: [], // No manual prefs needed!
+                interests: selectedInterests.map(i => i.value),
+                technical_skills: selectedSkills.map(s => s.value),
+                primary_project_format: selectedFormats.map(f => f.value),
+                preferences: [], 
                 has_pre_agreement: true,
                 pre_agreed_supervisor: selectedSupervisor
             };
@@ -116,7 +161,7 @@ const StudentProposal = () => {
             await axios.post('http://127.0.0.1:8000/allocation/add-student/', payload);
 
             setSuccessMessage(`Success! Your pre-agreement with ${selectedSupervisor} has been officially recorded. You will bypass the matching algorithm.`);
-            setStep(3); // Go straight to the finish line!
+            setStep(3); 
         } catch (err) {
             setError(err.response?.data?.message || 'Error: Could not add student.');
         } finally {
@@ -141,11 +186,11 @@ const StudentProposal = () => {
             const payload = {
                 name: name,
                 topic: topic,
-                interests: interestsInput.split(',').map(s => s.trim()).filter(s => s),
-                programming_languages: languagesInput.split(',').map(s => s.trim()).filter(s => s),
-                project_category: categoryInput.split(',').map(s => s.trim()).filter(s => s),
+                interests: selectedInterests.map(i => i.value),
+                technical_skills: selectedSkills.map(s => s.value),
+                primary_project_format: selectedFormats.map(f => f.value),
                 preferences: preferencesArray,
-                has_pre_agreement: false, // Standard route
+                has_pre_agreement: false,
                 pre_agreed_supervisor: ""
             };
 
@@ -186,23 +231,58 @@ const StudentProposal = () => {
                     </div>
 
                     <div className="row">
-                        <div className="col-md-4 mb-3">
+                        <div className="col-md-12 mb-3">
                             <label className="form-label fw-bold">Research Interests</label>
-                            <input type="text" className="form-control" value={interestsInput} onChange={(e) => setInterestsInput(e.target.value)} placeholder="e.g., AI, Security" />
+                            <CreatableSelect
+                                isMulti
+                                options={INTEREST_OPTIONS}
+                                value={selectedInterests}
+                                onChange={(opts) => setSelectedInterests(opts || [])}
+                                placeholder="Type an interest and press Enter..."
+                                formatCreateLabel={(inputValue) => `Add "${inputValue}"`}
+                            />
                         </div>
-                        <div className="col-md-4 mb-3">
-                            <label className="form-label fw-bold">Programming Languages</label>
-                            <input type="text" className="form-control" value={languagesInput} onChange={(e) => setLanguagesInput(e.target.value)} placeholder="e.g., Python, C++" />
+                        <div className="col-md-12 mb-3">
+                            <label className="form-label fw-bold">Technical Skills</label>
+                            <CreatableSelect
+                                isMulti
+                                options={SKILL_OPTIONS}
+                                value={selectedSkills}
+                                onChange={(opts) => setSelectedSkills(opts || [])}
+                                placeholder="Type a skill/language and press Enter..."
+                                formatCreateLabel={(inputValue) => `Add "${inputValue}"`}
+                            />
                         </div>
-                        <div className="col-md-4 mb-3">
-                            <label className="form-label fw-bold">Project Category</label>
-                            <input type="text" className="form-control" value={categoryInput} onChange={(e) => setCategoryInput(e.target.value)} placeholder="e.g., Web App, Research" />
+                        <div className="col-md-12 mb-4">
+                            <label className="form-label fw-bold d-flex align-items-center mb-2">
+                                Primary Project Format
+                                <span 
+                                className="badge bg-light text-secondary border border-primary ms-2 rounded-1"
+                                onClick={() => setShowFormatHelp(!showFormatHelp)}
+                                style={{ cursor: "pointer", fontSize: "0.8rem", padding: "0.4em 0.6em" }}
+                                >
+                                    ?
+                                </span>
+                            </label>
+                            {showFormatHelp && (
+                                <div className="alert alert-secondary py-2 px-3 mb-3 shadow-sm" style={{ fontSize: "0.85rem" }}>
+                                    <strong>What is a Project Format?</strong> It defines the primary output of your project. For example, are you building a software system, conducting theoretical research, or analysing data? <em>(Maximum 2 allowed)</em>
+                                </div>
+                            )}
+                            
+
+                            <Select
+                                isMulti
+                                options={FORMAT_OPTIONS}
+                                value={selectedFormats}
+                                onChange={handleFormatChange}
+                                placeholder="Select up to 2 formats..."
+                            />
                         </div>
                     </div>
-                    <div className="form-text mb-4 mt-neg-2">Separate multiple items in the boxes above using commas.</div>
 
                     {/* ========================================== */}
-                    {/* NEW PRE-AGREEMENT TOGGLE & DROPDOWN */}
+                    {/* PRE-AGREEMENT TOGGLE & DROPDOWN */}
                     {/* ========================================== */}
                     <div className="card bg-light border-0 p-4 mb-4 rounded">
                         <div className="form-check form-switch mb-3">
@@ -244,7 +324,6 @@ const StudentProposal = () => {
                         )}
                     </div>
 
-                    {/* DYNAMIC BUTTON - Changes based on the toggle! */}
                     {hasPreAgreement ? (
                         <button className="btn btn-success w-100 py-3 fw-bold" onClick={handleSubmitPreAgreement} disabled={loading || !name.trim() || !selectedSupervisor}>
                             {loading ? "Saving..." : "✅ Submit Pre-Agreed Proposal"}

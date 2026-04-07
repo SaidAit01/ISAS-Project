@@ -61,3 +61,4 @@ def calculate_academic_fit(students, supervisors):
         final_matrix.append(student_scores)
         
     return np.array(final_matrix)
+    

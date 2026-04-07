@@ -10,5 +10,6 @@ urlpatterns = [
     path('my-students/<str:supervisor_name>/', views.get_supervisor_students_api, name='my_students'),
     path('supervisor-profile/<str:supervisor_name>/', views.get_supervisor_profile_api, name='supervisor_profile'),
     path('directory/', views.get_all_supervisors_api, name='supervisor_directory'),
+    path('export-csv/', views.export_allocations_csv, name='export_csv'),
 
 ]

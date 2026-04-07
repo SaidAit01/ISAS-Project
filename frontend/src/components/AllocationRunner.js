@@ -25,6 +25,10 @@ const AllocationRunner = () => {
             setLoading(false);
         }
     };
+    const handleExport = () => {
+        // Simply open the Django URL in a new window to trigger the download
+        window.location.href = 'http://127.0.0.1:8000/allocation/export-csv/';
+    };
 
     return (
         <div className="container mt-4 max-w-5xl mx-auto mb-5">
@@ -47,6 +51,14 @@ const AllocationRunner = () => {
                 >
                     {loading ? "⚙️ Algorithm is running... please wait" : "Run Final Allocation"}
                 </button>
+
+                <button
+                    className="btn btn-outline-success btn-lg fw-bold ms-2 px-4"
+                    onClick={handleExport}
+                >
+                    📊 Download CSV for Registry
+                </button>
+
 
                 {error && <div className="alert alert-danger mt-4 fw-bold">{error}</div>}
 
