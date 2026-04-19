@@ -6,7 +6,7 @@ model = SentenceTransformer('all-MiniLM-L6-v2')
 
 def calculate_hybrid_score(student, supervisor, sbert_score):
 
-    student_skills = set(student.programming_languages)
+    student_skills = set(student.technical_skills)
     required_skills = set(supervisor.required_skills)
     
     if len(required_skills) == 0:
@@ -15,9 +15,9 @@ def calculate_hybrid_score(student, supervisor, sbert_score):
         skill_matches = student_skills.intersection(required_skills)
         skill_score = len(skill_matches) / len(required_skills)
         
-    student_categories = set(student.project_category)
+    student_categories = set(student.primary_project_format)
     # CRITICAL FIX: Updated to match the new models.py column name!
-    suggested_categories = set(supervisor.project_categories)
+    suggested_categories = set(supervisor.primary_project_format)
     
     if len(suggested_categories) == 0:
         category_score = 1.0

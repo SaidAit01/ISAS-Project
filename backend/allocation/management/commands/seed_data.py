@@ -2,103 +2,193 @@ from django.core.management.base import BaseCommand
 from allocation.models import StudentProposal, SupervisorProfile
 
 class Command(BaseCommand):
-    help = 'Seeds the database with a Minimum Viable Dataset (MVD) for testing the Hybrid Engine'
+    help = 'Seeds the database with a strictly hardcoded Minimum Viable Dataset (MVD)'
 
     def handle(self, *args, **kwargs):
         self.stdout.write(self.style.WARNING('Wiping old data...'))
         StudentProposal.objects.all().delete()
         SupervisorProfile.objects.all().delete()
 
-        # --- SUPERVISORS (Strict JSON List Format) ---
+        # ==========================================
+        # 1. THE 25 SUPERVISORS
+        # ==========================================
         supervisors = [
-            SupervisorProfile(
-                name="Dr. Turing", 
-                research_interests=["Artificial Intelligence", "Machine Learning", "Deep Learning", "Natural Language Processing"], 
-                suggested_projects=["Bias detection in LLMs", "Optimising neural network weights"],
-                required_skills=["Python", "PyTorch", "Mathematics"],
-                suggested_project_categories=["Theoretical Research", "Software Engineering"],
-                capacity=3
-            ),
-            SupervisorProfile(
-                name="Dr. Lovelace", 
-                research_interests=["Web Development", "React", "User Experience", "Front-End Architecture"], 
-                suggested_projects=["Accessible UI for the visually impaired", "React state management optimization"],
-                required_skills=["JavaScript", "React", "HTML/CSS"],
-                suggested_project_categories=["Software Engineering"],
-                capacity=2
-            ),
-            SupervisorProfile(
-                name="Dr. Hopper", 
-                research_interests=["Software Engineering", "Compilers", "Legacy Systems", "Java"], 
-                suggested_projects=["Automated COBOL refactoring tool", "JVM Garbage Collection Analysis"],
-                required_skills=["Java", "C++", "System Architecture"],
-                suggested_project_categories=["Theoretical Research", "Software Engineering"],
-                capacity=3
-            ),
-            SupervisorProfile(
-                name="Dr. Dijkstra", 
-                research_interests=["Algorithms", "Graph Theory", "Network Routing", "Theoretical Computer Science"], 
-                suggested_projects=["Optimizing A* Pathfinding", "Quantum limits of Shor's Algorithm"],
-                required_skills=["C++", "Mathematics", "Python"],
-                suggested_project_categories=["Theoretical Research"],
-                capacity=2
-            ),
-            SupervisorProfile(
-                name="Dr. Neumann", 
-                research_interests=["Computer Architecture", "Embedded Systems", "IoT", "Hardware Design"], 
-                suggested_projects=["Low-power smart agriculture sensors", "Bare-metal C++ for UAVs"],
-                required_skills=["C", "C++", "Hardware Design"],
-                suggested_project_categories=["Hardware", "Software Engineering"],
-                capacity=3
-            ),
-            SupervisorProfile(
-                name="Dr. Shannon", 
-                research_interests=["Information Theory", "Cryptography", "Cyber Security", "Blockchain"], 
-                suggested_projects=["Zero-knowledge proofs in voting", "Distributed ledger security"],
-                required_skills=["Python", "Cryptography", "Mathematics"],
-                suggested_project_categories=["Theoretical Research", "Software Engineering"],
-                capacity=2
-            )
+            # --- AI & Machine Learning Domain ---
+            SupervisorProfile(name="Dr. Turing", research_interests=["Artificial Intelligence", "Machine Learning", "Deep Learning"], suggested_projects=["Bias detection in LLMs", "Optimising neural network weights"], required_skills=["Python", "PyTorch", "Mathematics"], primary_project_format=["Theoretical Research", "Software Engineering"], capacity=3),
+            SupervisorProfile(name="Dr. Ng", research_interests=["Machine Learning", "Computer Vision", "AI"], suggested_projects=["Medical image classification", "Autonomous vehicle perception"], required_skills=["Python", "TensorFlow", "C++"], primary_project_format=["Software Engineering"], capacity=4),
+            SupervisorProfile(name="Dr. LeCun", research_interests=["Deep Learning", "Convolutional Networks"], suggested_projects=["Handwriting recognition", "Real-time video processing"], required_skills=["Python", "PyTorch"], primary_project_format=["Theoretical Research"], capacity=2),
+            SupervisorProfile(name="Dr. Hinton", research_interests=["Neural Networks", "Cognitive Science"], suggested_projects=["Backpropagation optimisations", "Generative adversarial networks"], required_skills=["Python", "Mathematics"], primary_project_format=["Theoretical Research"], capacity=3),
+            SupervisorProfile(name="Dr. Hassabis", research_interests=["Reinforcement Learning", "Game AI"], suggested_projects=["AlphaGo recreation", "Multi-agent environments"], required_skills=["Python", "C++", "Java"], primary_project_format=["Software Engineering"], capacity=3),
+
+            # --- Web & Software Engineering Domain ---
+            SupervisorProfile(name="Dr. Lovelace", research_interests=["Web Development", "React", "User Experience"], suggested_projects=["Accessible UI for the visually impaired", "React state management"], required_skills=["JavaScript", "React", "HTML/CSS"], primary_project_format=["Software Engineering"], capacity=2),
+            SupervisorProfile(name="Dr. Berners-Lee", research_interests=["Semantic Web", "Information Architecture"], suggested_projects=["Decentralised web protocols", "Linked data systems"], required_skills=["JavaScript", "Python"], primary_project_format=["Theoretical Research", "Software Engineering"], capacity=3),
+            SupervisorProfile(name="Dr. Eich", research_interests=["JavaScript", "Browser Engines", "WebAssembly"], suggested_projects=["JS Engine benchmarking", "WASM module compilers"], required_skills=["JavaScript", "C++", "Rust"], primary_project_format=["Software Engineering"], capacity=4),
+            SupervisorProfile(name="Dr. Torvalds", research_interests=["Operating Systems", "Version Control", "C"], suggested_projects=["Custom Linux kernel modules", "Git workflow automation"], required_skills=["C", "Bash", "C++"], primary_project_format=["Hardware", "Software Engineering"], capacity=2),
+            SupervisorProfile(name="Dr. Fowler", research_interests=["Software Architecture", "Microservices", "Agile"], suggested_projects=["Monolith to microservice refactoring", "CI/CD pipeline analysis"], required_skills=["Java", "Python", "Docker"], primary_project_format=["Software Engineering"], capacity=4),
+
+            # --- Cyber Security & Cryptography Domain ---
+            SupervisorProfile(name="Dr. Shannon", research_interests=["Information Theory", "Cryptography", "Cyber Security"], suggested_projects=["Zero-knowledge proofs", "Distributed ledger security"], required_skills=["Python", "Cryptography", "Mathematics"], primary_project_format=["Theoretical Research", "Software Engineering"], capacity=2),
+            SupervisorProfile(name="Dr. Rivest", research_interests=["Public Key Cryptography", "Hashing"], suggested_projects=["RSA vulnerability analysis", "Quantum-resistant hashing"], required_skills=["C++", "Mathematics", "Python"], primary_project_format=["Theoretical Research"], capacity=3),
+            SupervisorProfile(name="Dr. Shamir", research_interests=["Secret Sharing", "Network Security"], suggested_projects=["Secure multiparty computation", "IoT network sniffing"], required_skills=["Python", "C"], primary_project_format=["Software Engineering"], capacity=3),
+            SupervisorProfile(name="Dr. Adleman", research_interests=["DNA Computing", "Number Theory", "Security"], suggested_projects=["Prime factorization algorithms", "Biological computing simulations"], required_skills=["Mathematics", "Python"], primary_project_format=["Theoretical Research"], capacity=2),
+            SupervisorProfile(name="Dr. Nakamoto", research_interests=["Blockchain", "Decentralised Finance", "Smart Contracts"], suggested_projects=["Solidity contract auditing", "Consensus mechanism simulation"], required_skills=["Solidity", "JavaScript", "C++"], primary_project_format=["Software Engineering"], capacity=4),
+
+            # --- Hardware & IoT Domain ---
+            SupervisorProfile(name="Dr. Neumann", research_interests=["Computer Architecture", "Embedded Systems", "IoT"], suggested_projects=["Low-power smart agriculture", "Bare-metal C++ for UAVs"], required_skills=["C", "C++", "Hardware Design"], primary_project_format=["Hardware", "Software Engineering"], capacity=3),
+            SupervisorProfile(name="Dr. Moore", research_interests=["Semiconductors", "VLSI Design", "Hardware"], suggested_projects=["FPGA programming", "Logic gate optimisation"], required_skills=["Verilog", "C++", "Hardware Design"], primary_project_format=["Hardware"], capacity=2),
+            SupervisorProfile(name="Dr. Cray", research_interests=["Supercomputing", "Parallel Processing"], suggested_projects=["CUDA GPU acceleration", "Distributed array processing"], required_skills=["C++", "CUDA", "Python"], primary_project_format=["Software Engineering", "Hardware"], capacity=3),
+            SupervisorProfile(name="Dr. Hopper", research_interests=["Compilers", "Legacy Systems", "Hardware Integration"], suggested_projects=["Automated COBOL refactoring tool", "Compiler optimisation passes"], required_skills=["Java", "C++", "System Architecture"], primary_project_format=["Theoretical Research", "Software Engineering"], capacity=3),
+            SupervisorProfile(name="Dr. Ritchie", research_interests=["Unix", "Systems Programming", "C"], suggested_projects=["Custom shell development", "File system drivers"], required_skills=["C", "Bash", "Linux"], primary_project_format=["Software Engineering"], capacity=4),
+
+            # --- Data Science & Graph Theory Domain ---
+            SupervisorProfile(name="Dr. Dijkstra", research_interests=["Algorithms", "Graph Theory", "Network Routing"], suggested_projects=["Optimizing A* Pathfinding", "Quantum limits of algorithms"], required_skills=["C++", "Mathematics", "Python"], primary_project_format=["Theoretical Research"], capacity=2),
+            SupervisorProfile(name="Dr. Knuth", research_interests=["Algorithm Analysis", "Typography", "Mathematics"], suggested_projects=["LaTeX rendering engines", "Sorting algorithm heuristics"], required_skills=["C++", "Mathematics", "Java"], primary_project_format=["Theoretical Research", "Software Engineering"], capacity=3),
+            SupervisorProfile(name="Dr. Boole", research_interests=["Logic", "Data Mining", "Statistics"], suggested_projects=["Boolean search engines", "Big data classification"], required_skills=["Python", "SQL", "R"], primary_project_format=["Data Analysis"], capacity=4),
+            SupervisorProfile(name="Dr. Bayes", research_interests=["Probability", "Predictive Modelling"], suggested_projects=["Financial market forecasting", "Bayesian spam filters"], required_skills=["Python", "R", "Mathematics"], primary_project_format=["Data Analysis", "Theoretical Research"], capacity=3),
+            SupervisorProfile(name="Dr. Gauss", research_interests=["Computational Mathematics", "Physics Engines"], suggested_projects=["2D collision detection algorithms", "Fluid dynamics simulations"], required_skills=["C++", "Python", "Mathematics"], primary_project_format=["Software Engineering"], capacity=2),
         ]
         SupervisorProfile.objects.bulk_create(supervisors)
         self.stdout.write(self.style.SUCCESS(f'Created {len(supervisors)} Supervisors.'))
 
-        # --- STUDENTS (Strict JSON List Format & Ghost Flag) ---
+        # ==========================================
+        # 2. THE STUDENTS (Strict Array & Persona Setup)
+        # ==========================================
         students = [
-            # Original 6 Submitted Students
-            StudentProposal(name="Eleanor Davies", topic_description="CNN for medical diagnostics and AI.", student_research_interests=["Machine Learning", "Healthcare AI"], programming_languages=["Python", "PyTorch"], project_category=["Software Engineering"], manual_preferences=["Dr. Turing", "Dr. Lovelace"], has_submitted=True),
-            StudentProposal(name="Charlotte Lewis", topic_description="Hardware design for urban monitoring.", student_research_interests=["Embedded Systems", "IoT"], programming_languages=["C", "C++"], project_category=["Hardware"], manual_preferences=["Dr. Neumann", "Dr. Dijkstra"], has_submitted=True),
-            StudentProposal(name="Liam O'Connor", topic_description="Accessibility-first e-commerce platform.", student_research_interests=["Web Development", "UX Design"], programming_languages=["JavaScript", "React"], project_category=["Software Engineering"], manual_preferences=["Dr. Lovelace"], has_submitted=True),
-            StudentProposal(name="William Carter", topic_description="Theoretical limits of Shor's algorithm.", student_research_interests=["Quantum Computing", "Cryptography"], programming_languages=["Python", "Mathematics"], project_category=["Theoretical Research"], manual_preferences=["Dr. Dijkstra", "Dr. Shannon"], has_submitted=True),
-            StudentProposal(name="Marcus Johnson", topic_description="Vulnerabilities in standard IoT networks.", student_research_interests=["Cyber Security", "Networking"], programming_languages=["Python", "Bash"], project_category=["Software Engineering"], manual_preferences=["Dr. Shannon", "Dr. Neumann"], has_submitted=True),
-            StudentProposal(name="Amelia Martin", topic_description="A Java app for system architecture.", student_research_interests=["Java", "Systems"], programming_languages=["Java"], project_category=["Software Engineering"], manual_preferences=[], has_submitted=True),
+            # --- THE AI BOTTLENECK (12 Students fighting for 15 total AI slots) ---
+            StudentProposal(name="Sophia Patel", topic_description="NLP models for real-time translation.", student_research_interests=["Natural Language Processing", "AI"], technical_skills=["Python"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Turing", "Dr. Ng"], has_submitted=True),
+            StudentProposal(name="James Wilson", topic_description="Deep learning for autonomous driving.", student_research_interests=["Deep Learning", "Computer Vision"], technical_skills=["Python", "PyTorch"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Ng", "Dr. LeCun"], has_submitted=True),
+            StudentProposal(name="Mia Kim", topic_description="Bias mitigation in generative AI.", student_research_interests=["Artificial Intelligence", "Ethics"], technical_skills=["Python", "Mathematics"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Turing"], has_submitted=True),
+            StudentProposal(name="Lucas Garcia", topic_description="Optimising transformer architectures.", student_research_interests=["Machine Learning", "Algorithms"], technical_skills=["Python", "Mathematics"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Turing", "Dr. Hinton"], has_submitted=True),
+            StudentProposal(name="Ella Martinez", topic_description="Using RL for dynamic NPC behavior in games.", student_research_interests=["Reinforcement Learning", "Game AI"], technical_skills=["Python", "C++"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Hassabis", "Dr. Ng"], has_submitted=True),
+            StudentProposal(name="Jackson Lee", topic_description="Convolutional networks for anomaly detection.", student_research_interests=["Deep Learning", "Security"], technical_skills=["Python", "TensorFlow"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. LeCun"], has_submitted=True),
+            StudentProposal(name="Aiden White", topic_description="Mathematical limits of backpropagation.", student_research_interests=["Neural Networks", "Mathematics"], technical_skills=["Python", "Mathematics"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Hinton"], has_submitted=True),
+            StudentProposal(name="Zoe Harris", topic_description="Generative adversarial networks for art.", student_research_interests=["Machine Learning", "AI"], technical_skills=["Python"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Hinton", "Dr. Turing"], has_submitted=True),
+            StudentProposal(name="Ethan Clark", topic_description="Medical imaging using PyTorch.", student_research_interests=["Computer Vision", "Deep Learning"], technical_skills=["Python", "PyTorch"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Ng", "Dr. Turing"], has_submitted=True),
+            StudentProposal(name="Lily Lewis", topic_description="Multi-agent systems in grid environments.", student_research_interests=["Game AI", "Reinforcement Learning"], technical_skills=["Java", "Python"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Hassabis"], has_submitted=True),
+            StudentProposal(name="Mason Walker", topic_description="LLM prompt engineering optimizations.", student_research_interests=["Artificial Intelligence"], technical_skills=["Python"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Turing"], has_submitted=True),
+            StudentProposal(name="Isabella Hall", topic_description="Comparing CNNs vs Vision Transformers.", student_research_interests=["Computer Vision", "Machine Learning"], technical_skills=["Python", "PyTorch"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Ng", "Dr. LeCun"], has_submitted=True),
+
+            # --- THE MISMATCHED (Students applying to the wrong fields to test SBERT rejection) ---
+            StudentProposal(name="Oliver Brown", topic_description="I want to build a beautiful React website for local businesses.", student_research_interests=["Web Development", "React"], technical_skills=["JavaScript", "HTML/CSS"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Neumann", "Dr. Moore"], has_submitted=True), # Web dev applying to Hardware
+            StudentProposal(name="Amelia Young", topic_description="A study on prime factorization and RSA.", student_research_interests=["Cryptography", "Mathematics"], technical_skills=["Python", "Mathematics"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Lovelace"], has_submitted=True), # Crypto applying to UI/UX
+            StudentProposal(name="Logan King", topic_description="Developing a low-level C++ driver for an IoT device.", student_research_interests=["Hardware", "Embedded Systems"], technical_skills=["C++", "C"], primary_project_format=["Hardware"], manual_preferences=["Dr. Turing", "Dr. Hinton"], has_submitted=True), # Hardware applying to AI
+            StudentProposal(name="Chloe Wright", topic_description="A dashboard for financial data forecasting using R.", student_research_interests=["Data Analysis", "Statistics"], technical_skills=["R", "SQL"], primary_project_format=["Data Analysis"], manual_preferences=["Dr. Torvalds"], has_submitted=True), # Data analysis applying to Linux OS
+
+            # --- THE GHOSTS (Students who missed the deadline) ---
+            StudentProposal(name="William Turner", topic_description="", student_research_interests=[], technical_skills=[], primary_project_format=[], manual_preferences=[], has_submitted=False),
+            StudentProposal(name="Grace Adams", topic_description="", student_research_interests=[], technical_skills=[], primary_project_format=[], manual_preferences=[], has_submitted=False),
+            StudentProposal(name="Caleb Baker", topic_description="", student_research_interests=[], technical_skills=[], primary_project_format=[], manual_preferences=[], has_submitted=False),
+            StudentProposal(name="Aria Nelson", topic_description="", student_research_interests=[], technical_skills=[], primary_project_format=[], manual_preferences=[], has_submitted=False),
+
+            # --- THE WEB / SOFTWARE GROUP ---
+            StudentProposal(name="Ava Robinson", topic_description="State management in large React applications.", student_research_interests=["React", "Front-End Architecture"], technical_skills=["JavaScript", "React"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Lovelace"], has_submitted=True),
+            StudentProposal(name="Noah Carter", topic_description="Semantic data linking in modern web apps.", student_research_interests=["Semantic Web"], technical_skills=["JavaScript", "Python"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Berners-Lee"], has_submitted=True),
+            StudentProposal(name="Evelyn Mitchell", topic_description="Compiling Rust to WebAssembly.", student_research_interests=["WebAssembly", "Compilers"], technical_skills=["Rust", "JavaScript"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Eich", "Dr. Hopper"], has_submitted=True),
+            StudentProposal(name="Henry Perez", topic_description="Microservice architecture via Docker containers.", student_research_interests=["Software Architecture", "Microservices"], technical_skills=["Java", "Docker"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Fowler"], has_submitted=True),
+            StudentProposal(name="Charlotte Roberts", topic_description="Automating Git workflows with Bash.", student_research_interests=["Version Control", "Operating Systems"], technical_skills=["Bash", "C"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Torvalds"], has_submitted=True),
+
+            # --- THE SECURITY / CRYPTO GROUP ---
+            StudentProposal(name="Harper Lee", topic_description="Post-quantum cryptography implementations.", student_research_interests=["Cyber Security", "Cryptography"], technical_skills=["C++", "Python"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Rivest", "Dr. Shannon"], has_submitted=True),
+            StudentProposal(name="Benjamin Turner", topic_description="Smart contract vulnerability auditing.", student_research_interests=["Blockchain", "Security"], technical_skills=["Solidity", "JavaScript"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Nakamoto"], has_submitted=True),
+            StudentProposal(name="Abigail Phillips", topic_description="Zero-knowledge proofs in digital identity.", student_research_interests=["Cryptography", "Mathematics"], technical_skills=["Python", "Mathematics"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Shannon", "Dr. Adleman"], has_submitted=True),
+            StudentProposal(name="Alexander Campbell", topic_description="IoT network sniffing using C.", student_research_interests=["Network Security", "Hardware"], technical_skills=["C", "Python"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Shamir", "Dr. Neumann"], has_submitted=True),
+
+            # --- THE HARDWARE / SYSTEMS GROUP ---
+            StudentProposal(name="Sebastian Evans", topic_description="Efficient graph routing on embedded devices.", student_research_interests=["Graph Theory", "Embedded Systems"], technical_skills=["C++", "C"], primary_project_format=["Hardware"], manual_preferences=["Dr. Neumann", "Dr. Dijkstra"], has_submitted=True),
+            StudentProposal(name="Victoria Stewart", topic_description="FPGA logic gate optimisations.", student_research_interests=["Hardware Design", "Semiconductors"], technical_skills=["Verilog", "C++"], primary_project_format=["Hardware"], manual_preferences=["Dr. Moore"], has_submitted=True),
+            StudentProposal(name="Daniel Sanchez", topic_description="CUDA acceleration for physics engines.", student_research_interests=["Supercomputing", "Parallel Processing"], technical_skills=["C++", "CUDA"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Cray", "Dr. Gauss"], has_submitted=True),
+            StudentProposal(name="Madison Morris", topic_description="Refactoring legacy COBOL systems to Java.", student_research_interests=["Legacy Systems", "Software Architecture"], technical_skills=["Java", "System Architecture"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Hopper", "Dr. Fowler"], has_submitted=True),
+            StudentProposal(name="Samuel Rogers", topic_description="Developing custom file system drivers in Linux.", student_research_interests=["Operating Systems", "Systems Programming"], technical_skills=["C", "Linux"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Ritchie", "Dr. Torvalds"], has_submitted=True),
+
+            # --- THE DATA / MATH GROUP ---
+            StudentProposal(name="Penelope Reed", topic_description="A* pathfinding optimisations in C++.", student_research_interests=["Algorithms", "Graph Theory"], technical_skills=["C++", "Mathematics"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Dijkstra"], has_submitted=True),
+            StudentProposal(name="David Cook", topic_description="LaTeX rendering algorithms.", student_research_interests=["Algorithm Analysis", "Typography"], technical_skills=["C++", "Java"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Knuth"], has_submitted=True),
+            StudentProposal(name="Eleanor Morgan", topic_description="Boolean logic in big data classification.", student_research_interests=["Data Mining", "Statistics"], technical_skills=["Python", "SQL"], primary_project_format=["Data Analysis"], manual_preferences=["Dr. Boole"], has_submitted=True),
+            StudentProposal(name="Joseph Bell", topic_description="Bayesian modelling for spam filters.", student_research_interests=["Probability", "Predictive Modelling"], technical_skills=["Python", "R"], primary_project_format=["Data Analysis"], manual_preferences=["Dr. Bayes"], has_submitted=True),
+            StudentProposal(name="Scarlett Murphy", topic_description="Fluid dynamics simulations using Python.", student_research_interests=["Physics Engines", "Computational Mathematics"], technical_skills=["Python", "Mathematics"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Gauss"], has_submitted=True),
+            # --- THE HIGH-ACHIEVERS (Designed to displace weaker incumbents) ---
+            StudentProposal(name="Alexander Wright", topic_description="A novel mathematical approach to transformer attention mechanisms.", student_research_interests=["Deep Learning", "Mathematics"], technical_skills=["Python", "PyTorch", "Mathematics"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Turing", "Dr. Hinton"], has_submitted=True),
+            StudentProposal(name="Sophia Green", topic_description="Zero-knowledge rollups for high-throughput Ethereum scaling.", student_research_interests=["Blockchain", "Cryptography"], technical_skills=["Solidity", "C++", "Cryptography"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Nakamoto", "Dr. Shannon"], has_submitted=True),
+            StudentProposal(name="Jacob Anderson", topic_description="Real-time bounding box optimisations in YOLOv8 for autonomous vehicles.", student_research_interests=["Computer Vision", "Machine Learning"], technical_skills=["Python", "C++", "TensorFlow"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Ng", "Dr. LeCun"], has_submitted=True),
+            StudentProposal(name="Emily Thomas", topic_description="Bare-metal memory management for constrained IoT devices.", student_research_interests=["Embedded Systems", "Operating Systems"], technical_skills=["C", "Hardware Design"], primary_project_format=["Hardware"], manual_preferences=["Dr. Neumann", "Dr. Torvalds"], has_submitted=True),
+
+            # --- THE CHAOS AGENTS (Testing NLP and Jaccard Rejection Thresholds) ---
+            StudentProposal(name="Kevin Hall", topic_description="I want to learn about Artificial Intelligence and maybe make a chatbot.", student_research_interests=["AI"], technical_skills=["HTML/CSS"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Turing", "Dr. Hassabis"], has_submitted=True), # Irrelevant skills for AI
+            StudentProposal(name="Brian Allen", topic_description="Using R and statistics to analyse CPU clock speeds.", student_research_interests=["Data Analysis"], technical_skills=["R", "SQL"], primary_project_format=["Data Analysis"], manual_preferences=["Dr. Moore", "Dr. Cray"], has_submitted=True), # Applying to Hardware with Data skills
+            StudentProposal(name="Jessica Young", topic_description="Design a cool user interface for a theoretical physics engine.", student_research_interests=["User Experience"], technical_skills=["JavaScript", "React"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Gauss", "Dr. Knuth"], has_submitted=True), # UI dev applying to hardcore maths
+
+            # --- THE GENERAL APPLICANTS (Filling out the allocation matrix) ---
+            # AI & Machine Learning
+            StudentProposal(name="Michael Jackson", topic_description="Evaluating Q-learning in multi-agent competitive environments.", student_research_interests=["Reinforcement Learning", "Game AI"], technical_skills=["Python", "Java"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Hassabis"], has_submitted=True),
+            StudentProposal(name="Sarah White", topic_description="Applying cognitive science heuristics to neural network architecture.", student_research_interests=["Cognitive Science", "Neural Networks"], technical_skills=["Python"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Hinton"], has_submitted=True),
             
-            # THE AI BOTTLENECK (Competing for Turing's 3 slots)
-            StudentProposal(name="Sophia Patel", topic_description="NLP models for translation.", student_research_interests=["Natural Language Processing", "AI"], programming_languages=["Python"], project_category=["Theoretical Research"], manual_preferences=["Dr. Turing"], has_submitted=True),
-            StudentProposal(name="James Wilson", topic_description="Deep learning for autonomous driving.", student_research_interests=["Deep Learning", "Computer Vision"], programming_languages=["Python", "PyTorch"], project_category=["Software Engineering"], manual_preferences=["Dr. Turing"], has_submitted=True),
-            StudentProposal(name="Mia Kim", topic_description="Bias mitigation in generative AI.", student_research_interests=["Artificial Intelligence", "Ethics"], programming_languages=["Python"], project_category=["Theoretical Research"], manual_preferences=["Dr. Turing"], has_submitted=True),
-            StudentProposal(name="Lucas Garcia", topic_description="Optimising transformer architectures.", student_research_interests=["Machine Learning", "Algorithms"], programming_languages=["Python", "Mathematics"], project_category=["Theoretical Research"], manual_preferences=["Dr. Turing", "Dr. Dijkstra"], has_submitted=True),
-            
-            # THE WEB DEV BOTTLENECK (Competing for Lovelace's 2 slots)
-            StudentProposal(name="Ava Robinson", topic_description="State management in large React applications.", student_research_interests=["React", "Front-End Architecture"], programming_languages=["JavaScript", "React"], project_category=["Software Engineering"], manual_preferences=["Dr. Lovelace"], has_submitted=True),
-            StudentProposal(name="Ethan Wright", topic_description="Micro-frontends using modern JS frameworks.", student_research_interests=["Web Development", "Software Architecture"], programming_languages=["JavaScript", "HTML/CSS"], project_category=["Software Engineering"], manual_preferences=["Dr. Lovelace", "Dr. Hopper"], has_submitted=True),
-            StudentProposal(name="Chloe Martinez", topic_description="UX patterns for mobile-first PWA.", student_research_interests=["User Experience", "Web Development"], programming_languages=["JavaScript"], project_category=["Software Engineering"], manual_preferences=["Dr. Lovelace"], has_submitted=True),
+            # Web & Software
+            StudentProposal(name="David Harris", topic_description="Benchmarking WebAssembly modules against native C code.", student_research_interests=["WebAssembly", "Compilers"], technical_skills=["Rust", "C", "JavaScript"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Eich"], has_submitted=True),
+            StudentProposal(name="Jessica Martin", topic_description="Strangler fig pattern for decomposing monolithic Java applications.", student_research_interests=["Software Architecture", "Microservices"], technical_skills=["Java", "Docker"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Fowler", "Dr. Hopper"], has_submitted=True),
+            StudentProposal(name="Thomas Thompson", topic_description="Building a robust CI/CD pipeline for decentralised apps.", student_research_interests=["Agile", "Semantic Web"], technical_skills=["Python", "Bash"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Berners-Lee", "Dr. Fowler"], has_submitted=True),
 
-            # THE SECURITY/CRYPTO GROUP (Competing for Shannon's 2 slots)
-            StudentProposal(name="Noah Clark", topic_description="Zero-knowledge proofs in digital identity.", student_research_interests=["Cryptography", "Blockchain"], programming_languages=["Python", "Mathematics"], project_category=["Theoretical Research"], manual_preferences=["Dr. Shannon", "Dr. Dijkstra"], has_submitted=True),
-            StudentProposal(name="Harper Lee", topic_description="Post-quantum cryptography implementations.", student_research_interests=["Cyber Security", "Cryptography"], programming_languages=["C++", "Python"], project_category=["Theoretical Research"], manual_preferences=["Dr. Shannon"], has_submitted=True),
+            # Security & Crypto
+            StudentProposal(name="Ashley Clark", topic_description="Secure multiparty computation over untrusted networks.", student_research_interests=["Secret Sharing", "Network Security"], technical_skills=["Python", "Mathematics"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Shamir", "Dr. Adleman"], has_submitted=True),
+            StudentProposal(name="Matthew Robinson", topic_description="Auditing Ethereum smart contracts for reentrancy vulnerabilities.", student_research_interests=["Blockchain", "Security"], technical_skills=["Solidity", "Python"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Nakamoto"], has_submitted=True),
+            StudentProposal(name="Andrew Rodriguez", topic_description="Mathematical limits of RSA against Shor's algorithm.", student_research_interests=["Public Key Cryptography"], technical_skills=["Mathematics", "Python"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Rivest", "Dr. Adleman"], has_submitted=True),
 
-            # THE HARDWARE/C++ GROUP (Competing for Neumann & Dijkstra)
-            StudentProposal(name="Benjamin Hall", topic_description="Efficient graph routing on embedded devices.", student_research_interests=["Graph Theory", "Embedded Systems"], programming_languages=["C++", "C"], project_category=["Hardware"], manual_preferences=["Dr. Neumann", "Dr. Dijkstra"], has_submitted=True),
-            StudentProposal(name="Evelyn Young", topic_description="Low-power UAV flight controllers.", student_research_interests=["Hardware Design", "IoT"], programming_languages=["C", "C++"], project_category=["Hardware"], manual_preferences=["Dr. Neumann"], has_submitted=True),
-            StudentProposal(name="Alexander King", topic_description="A* pathfinding optimisations in C++.", student_research_interests=["Algorithms", "Network Routing"], programming_languages=["C++"], project_category=["Software Engineering"], manual_preferences=["Dr. Dijkstra", "Dr. Hopper"], has_submitted=True),
+            # Hardware & Systems
+            StudentProposal(name="Laura Garcia", topic_description="Optimising parallel processing arrays using CUDA.", student_research_interests=["Supercomputing", "Parallel Processing"], technical_skills=["C++", "CUDA"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Cray", "Dr. Moore"], has_submitted=True),
+            StudentProposal(name="Daniel Martinez", topic_description="Developing custom Unix shell scripts for system administrators.", student_research_interests=["Unix", "Systems Programming"], technical_skills=["Bash", "C", "Linux"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Ritchie"], has_submitted=True),
 
-            # THE JAVA/ENTERPRISE GROUP (Competing for Hopper's 3 slots)
-            StudentProposal(name="Grace Scott", topic_description="Modernizing legacy banking infrastructure.", student_research_interests=["Legacy Systems", "System Architecture"], programming_languages=["Java"], project_category=["Software Engineering"], manual_preferences=["Dr. Hopper"], has_submitted=True),
-            StudentProposal(name="Daniel Adams", topic_description="Garbage collection heuristics in large JVMs.", student_research_interests=["Compilers", "Java"], programming_languages=["Java", "C++"], project_category=["Theoretical Research"], manual_preferences=["Dr. Hopper", "Dr. Dijkstra"], has_submitted=True),
+            # Data Science & Maths
+            StudentProposal(name="Joshua Lewis", topic_description="Heuristics for dynamic graph routing in unstable networks.", student_research_interests=["Graph Theory", "Algorithms"], technical_skills=["C++", "Python"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Dijkstra", "Dr. Knuth"], has_submitted=True),
+            StudentProposal(name="Amanda Lee", topic_description="Big data classification using purely Boolean logic structures.", student_research_interests=["Data Mining", "Logic"], technical_skills=["SQL", "Python"], primary_project_format=["Data Analysis"], manual_preferences=["Dr. Boole"], has_submitted=True),
+            StudentProposal(name="Christopher Walker", topic_description="Predictive modelling of 2D fluid dynamics collisions.", student_research_interests=["Computational Mathematics", "Physics Engines"], technical_skills=["C++", "Mathematics"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Gauss", "Dr. Bayes"], has_submitted=True),
+            StudentProposal(name="Luke Taylor", topic_description="Predictive maintenance using time-series AI.", student_research_interests=["Machine Learning", "IoT"], technical_skills=["Python", "TensorFlow"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Ng"], has_submitted=True),
+            StudentProposal(name="Grace Anderson", topic_description="Heuristics for chess engines using neural networks.", student_research_interests=["Game AI", "Neural Networks"], technical_skills=["C++", "Python"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Hassabis", "Dr. Hinton"], has_submitted=True),
+            StudentProposal(name="Anthony Thomas", topic_description="Facial recognition bias in diverse datasets.", student_research_interests=["Computer Vision", "Ethics"], technical_skills=["Python", "PyTorch"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. LeCun"], has_submitted=True),
+            StudentProposal(name="Mia Jackson", topic_description="Transformer models for summarizing legal documents.", student_research_interests=["Natural Language Processing"], technical_skills=["Python"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Turing", "Dr. Ng"], has_submitted=True),
+            StudentProposal(name="Dylan White", topic_description="Offline reinforcement learning for robotics.", student_research_interests=["Reinforcement Learning", "Robotics"], technical_skills=["C++", "Python"], primary_project_format=["Hardware"], manual_preferences=["Dr. Hassabis"], has_submitted=True),
+            StudentProposal(name="Natalie Harris", topic_description="Audio deepfakes detection algorithms.", student_research_interests=["Deep Learning", "Security"], technical_skills=["Python", "Mathematics"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. LeCun", "Dr. Turing"], has_submitted=True),
+            StudentProposal(name="Isaac Martin", topic_description="Federated learning for privacy-preserving AI.", student_research_interests=["Machine Learning", "Cryptography"], technical_skills=["Python", "C++"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Ng", "Dr. Shannon"], has_submitted=True),
+            StudentProposal(name="Samantha Thompson", topic_description="Generative AI for automated UI design.", student_research_interests=["Artificial Intelligence", "User Experience"], technical_skills=["Python", "JavaScript"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Hinton", "Dr. Lovelace"], has_submitted=True),
+            StudentProposal(name="Owen Garcia", topic_description="Spiking neural networks for low-power hardware.", student_research_interests=["Neural Networks", "Hardware Design"], technical_skills=["C", "Python"], primary_project_format=["Hardware"], manual_preferences=["Dr. Hinton", "Dr. Neumann"], has_submitted=True),
+            StudentProposal(name="Aaliyah Martinez", topic_description="Medical diagnosis using multimodal LLMs.", student_research_interests=["Deep Learning", "Healthcare AI"], technical_skills=["Python", "PyTorch"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Turing", "Dr. Ng"], has_submitted=True),
 
-            # 21. THE GHOST STUDENT (Missed the deadline!)
-            StudentProposal(name="Oliver Brown", topic_description="", student_research_interests=[], programming_languages=[], project_category=[], manual_preferences=[], has_submitted=False),
+            # --- Web & Software Engineering (10 Students) ---
+            StudentProposal(name="Connor Robinson", topic_description="Evaluating serverless architecture latency.", student_research_interests=["Cloud Computing", "Software Architecture"], technical_skills=["JavaScript", "Python"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Fowler"], has_submitted=True),
+            StudentProposal(name="Stella Clark", topic_description="Building a progressive web app for mental health.", student_research_interests=["Web Development", "User Experience"], technical_skills=["JavaScript", "React", "HTML/CSS"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Lovelace"], has_submitted=True),
+            StudentProposal(name="Julian Rodriguez", topic_description="Decentralised identity verification using Web3.", student_research_interests=["Semantic Web", "Blockchain"], technical_skills=["JavaScript", "Solidity"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Berners-Lee", "Dr. Nakamoto"], has_submitted=True),
+            StudentProposal(name="Victoria Lewis", topic_description="Automated code review using static analysis tools.", student_research_interests=["Software Engineering", "Compilers"], technical_skills=["Java", "C++"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Hopper", "Dr. Fowler"], has_submitted=True),
+            StudentProposal(name="Levi Lee", topic_description="Custom Linux kernel modules for gaming performance.", student_research_interests=["Operating Systems"], technical_skills=["C", "Linux", "Bash"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Torvalds"], has_submitted=True),
+            StudentProposal(name="Hazel Walker", topic_description="Accessibility patterns in single-page applications.", student_research_interests=["User Experience", "Web Development"], technical_skills=["React", "HTML/CSS"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Lovelace"], has_submitted=True),
+            StudentProposal(name="Eli Hall", topic_description="Optimising V8 JavaScript engine garbage collection.", student_research_interests=["Browser Engines", "C++"], technical_skills=["C++", "JavaScript"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Eich"], has_submitted=True),
+            StudentProposal(name="Aurora Allen", topic_description="Event-driven microservices in enterprise e-commerce.", student_research_interests=["Microservices", "System Architecture"], technical_skills=["Java", "Docker"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Fowler"], has_submitted=True),
+            StudentProposal(name="Aaron Young", topic_description="Cross-compiling legacy C applications to WebAssembly.", student_research_interests=["WebAssembly", "Legacy Systems"], technical_skills=["C", "Rust"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Eich", "Dr. Hopper"], has_submitted=True),
+            StudentProposal(name="Maya Hernandez", topic_description="A peer-to-peer file sharing protocol over HTTPS.", student_research_interests=["Network Engineering", "Web Development"], technical_skills=["Python", "JavaScript"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Berners-Lee", "Dr. Torvalds"], has_submitted=True),
+
+            # --- Cyber Security & Cryptography (7 Students) ---
+            StudentProposal(name="Hunter King", topic_description="Vulnerabilities in quantum key distribution.", student_research_interests=["Cryptography", "Quantum Computing"], technical_skills=["Mathematics", "Python"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Rivest"], has_submitted=True),
+            StudentProposal(name="Bella Wright", topic_description="Developing a secure multiparty voting system.", student_research_interests=["Secret Sharing", "Cyber Security"], technical_skills=["Python", "C++"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Shamir", "Dr. Shannon"], has_submitted=True),
+            StudentProposal(name="Christian Lopez", topic_description="Penetration testing of IoT smart home devices.", student_research_interests=["Network Security", "IoT"], technical_skills=["Bash", "Python"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Shamir", "Dr. Neumann"], has_submitted=True),
+            StudentProposal(name="Elena Hill", topic_description="DNA computing models for breaking encryption.", student_research_interests=["DNA Computing", "Cryptography"], technical_skills=["Mathematics", "Python"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Adleman", "Dr. Rivest"], has_submitted=True),
+            StudentProposal(name="Landon Scott", topic_description="Flash loan attack mitigation in DeFi smart contracts.", student_research_interests=["Blockchain", "Decentralised Finance"], technical_skills=["Solidity", "JavaScript"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Nakamoto"], has_submitted=True),
+            StudentProposal(name="Cora Green", topic_description="Steganography techniques in digital video formats.", student_research_interests=["Information Theory", "Security"], technical_skills=["C++", "Mathematics"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Shannon", "Dr. Adleman"], has_submitted=True),
+            StudentProposal(name="Josiah Adams", topic_description="Ransomware propagation vectors in enterprise networks.", student_research_interests=["Network Security"], technical_skills=["Python", "C"], primary_project_format=["Data Analysis"], manual_preferences=["Dr. Shamir"], has_submitted=True),
+
+            # --- Hardware & Systems (7 Students) ---
+            StudentProposal(name="Ruby Baker", topic_description="Power consumption limits of VLSI designs.", student_research_interests=["VLSI Design", "Semiconductors"], technical_skills=["Verilog", "Mathematics"], primary_project_format=["Hardware"], manual_preferences=["Dr. Moore"], has_submitted=True),
+            StudentProposal(name="Jonathan Gonzalez", topic_description="Bare-metal drivers for custom robotic appendages.", student_research_interests=["Embedded Systems", "Robotics"], technical_skills=["C", "C++"], primary_project_format=["Hardware"], manual_preferences=["Dr. Neumann"], has_submitted=True),
+            StudentProposal(name="Eva Nelson", topic_description="Compiler optimisation passes for ARM architecture.", student_research_interests=["Compilers", "Computer Architecture"], technical_skills=["C++", "Java"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Hopper", "Dr. Moore"], has_submitted=True),
+            StudentProposal(name="Cameron Carter", topic_description="Distributed array processing for weather simulation.", student_research_interests=["Supercomputing", "Parallel Processing"], technical_skills=["C++", "CUDA"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Cray"], has_submitted=True),
+            StudentProposal(name="Sadie Mitchell", topic_description="Custom Unix shell with built-in networking tools.", student_research_interests=["Unix", "Systems Programming"], technical_skills=["C", "Bash"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Ritchie", "Dr. Torvalds"], has_submitted=True),
+            StudentProposal(name="Jeremiah Perez", topic_description="FPGA implementations of hashing algorithms.", student_research_interests=["Hardware Design", "Cryptography"], technical_skills=["Verilog", "Python"], primary_project_format=["Hardware"], manual_preferences=["Dr. Moore", "Dr. Rivest"], has_submitted=True),
+            StudentProposal(name="Penelope Roberts", topic_description="Real-time OS scheduling algorithms.", student_research_interests=["Operating Systems", "Algorithms"], technical_skills=["C", "C++"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Torvalds", "Dr. Ritchie"], has_submitted=True),
+
+            # --- Data Science & Graph Theory (6 Students) ---
+            StudentProposal(name="Ezekiel Turner", topic_description="Dynamic graph routing for delivery drones.", student_research_interests=["Graph Theory", "Algorithms"], technical_skills=["C++", "Python"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Dijkstra"], has_submitted=True),
+            StudentProposal(name="Violet Phillips", topic_description="Evaluating sort algorithm heuristics on big data.", student_research_interests=["Algorithm Analysis", "Big Data"], technical_skills=["Java", "C++"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Knuth", "Dr. Boole"], has_submitted=True),
+            StudentProposal(name="Mateo Campbell", topic_description="Predicting real estate prices using Bayesian models.", student_research_interests=["Predictive Modelling", "Statistics"], technical_skills=["R", "Python"], primary_project_format=["Data Analysis"], manual_preferences=["Dr. Bayes"], has_submitted=True),
+            StudentProposal(name="Lydia Parker", topic_description="Physics engines for soft-body deformations.", student_research_interests=["Physics Engines", "Computational Mathematics"], technical_skills=["C++", "Mathematics"], primary_project_format=["Software Engineering"], manual_preferences=["Dr. Gauss", "Dr. Cray"], has_submitted=True),
+            StudentProposal(name="Lincoln Evans", topic_description="Automated theorem proving in formal logic.", student_research_interests=["Logic", "Mathematics"], technical_skills=["Python", "SQL"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Boole", "Dr. Knuth"], has_submitted=True),
+            StudentProposal(name="Jasmine Edwards", topic_description="Markov chains in natural language generation.", student_research_interests=["Probability", "Natural Language Processing"], technical_skills=["Python", "Mathematics"], primary_project_format=["Theoretical Research"], manual_preferences=["Dr. Bayes", "Dr. Turing"], has_submitted=True),
         ]
 
         StudentProposal.objects.bulk_create(students)

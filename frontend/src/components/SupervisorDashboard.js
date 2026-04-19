@@ -246,7 +246,7 @@ const SupervisorDashboard = () => {
 
                                 {showFormatHelp && (
                                     <div className="alert alert-secondary py-2 px-3 mb-3 shadow-sm" style={{ fontSize: "0.85rem" }}>
-                                        <strong>System Matching Logic:</strong> Select the primary project modalities you are willing to supervise. The algorithm uses this as a strict filter to ensure you are only matched with students whose projects align with your methodological grading expertise.
+                                        <strong>System Matching Logic:</strong> Select the primary project modalities you are willing to supervise. The algorithm uses this as a strict filter to ensure you are matched with students whose projects align with your methodological grading expertise.
                                     </div>
                                 )}
 

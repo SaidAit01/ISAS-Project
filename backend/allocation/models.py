@@ -7,7 +7,7 @@ class SupervisorProfile(models.Model) :
     research_interests = models.JSONField(default=list) 
     suggested_projects = models.JSONField(default=list)
     required_skills = models.JSONField(default=list)
-    project_categories = models.JSONField(default=list)
+    primary_project_format = models.JSONField(default=list)
     capacity = models.IntegerField(default=5)
 
     def __str__(self):
@@ -17,7 +17,7 @@ class StudentProposal(models.Model):
     name = models.CharField(max_length=100)
     topic_description = models.TextField()
     student_research_interests = models.JSONField(default=list)
-    technical_Skills = models.JSONField(default=list)
+    technical_skills = models.JSONField(default=list)
     primary_project_format = models.JSONField(default=list)
     manual_preferences = models.JSONField(default=list)
     has_submitted = models.BooleanField(default=False)

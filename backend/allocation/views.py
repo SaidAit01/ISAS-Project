@@ -3,10 +3,22 @@ from .models import SupervisorProfile, StudentProposal, SystemConfiguration
 from .services import calculate_academic_fit
 from .algorithms import generate_hybrid_preferences, spa_allocation
 import json 
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from .permissions import IsProjectCoordinator, IsSupervisor, IsStudent
 from django.views.decorators.csrf import csrf_exempt
 import csv
-from django.http import HttpResponse
+from django.http import JsonResponse, HttpResponse
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import CustomTokenObtainPairSerializer
+from .permissions import IsProjectCoordinator
 
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
+@api_view(['POST'])
+@permission_classes([IsProjectCoordinator]
 def run_allocation_algorithm(request):
     # 1. Fetch Data
     supervisors = list(SupervisorProfile.objects.all())
@@ -126,11 +138,12 @@ def run_allocation_algorithm(request):
     })
 
 
-@csrf_exempt
+@api_view(['POST'])
+@permission_classes([IsStudent])
 def add_student_api(request):
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)
+            data = request.data
             word_count = len(data.get('topic', '').split())
             if word_count > 200:
                 return JsonResponse({
@@ -160,8 +173,8 @@ def add_student_api(request):
                 defaults={
                     'topic_description': data.get('topic'),
                     'student_research_interests': data.get('interests', []),
-                    'programming_languages': data.get('programming_languages', []),
-                    'project_category': data.get('project_category', []),
+                    'technical_skills': data.get('technical_skills', []),
+                    'primary_project_format': data.get('primary_project_format', []),
                     'manual_preferences': preferences,
                     'has_submitted': True, 
                     'has_pre_agreement': has_pre_agreement,
@@ -178,12 +191,13 @@ def add_student_api(request):
             
     return JsonResponse({"status": "error", "message": "Invalid method"}, status=405)
 
-@csrf_exempt
+@api_view(['POST'])
+@permission_classes([IsSupervisor])
 def add_supervisor_api(request):
     """Upsert endpoint for Supervisors to create or update their profile from React."""
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)
+            data = json.requrests.data
             
             # Use update_or_create to prevent duplicates!
             supervisor, created = SupervisorProfile.objects.update_or_create(
@@ -193,7 +207,7 @@ def add_supervisor_api(request):
                     # Using .get() gracefully handles if some fields are left blank
                     'suggested_projects': data.get('suggested_projects', []), 
                     'required_skills': data.get('required_skills', []),
-                    'project_categories': data.get('project_categories', []),
+                    'primary_project_format': data.get('primary_project_format', []),
                     'capacity': int(data.get('capacity', 1))
                 }
             )
@@ -204,6 +218,8 @@ def add_supervisor_api(request):
             
     return JsonResponse({"status": "error", "message": "Invalid method"}, status=405)
 
+@api_view(['GET'])
+@permission_classes([IsSupervisor])
 def get_supervisor_profile_api(request, supervisor_name):
     """Fetches a supervisor's current profile data to pre-fill the React form."""
     if request.method == 'GET':
@@ -217,7 +233,7 @@ def get_supervisor_profile_api(request, supervisor_name):
                     # Using getattr as a safety net just in case your model field names differ slightly
                     "suggested_projects": getattr(sup, 'suggested_projects', []),
                     "required_skills": getattr(sup, 'required_skills', []),
-                    "project_categories": getattr(sup, 'project_categories', []),
+                    "primary_project_format": getattr(sup, 'primary_project_format', []),
                     "capacity": sup.capacity
                 }
             })
@@ -226,7 +242,8 @@ def get_supervisor_profile_api(request, supervisor_name):
             
     return JsonResponse({"status": "error", "message": "Invalid method"}, status=405)
 
-@csrf_exempt
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
 def get_system_config(request):
     """
     API endpoint to fetch or update the global system rules.
@@ -242,8 +259,11 @@ def get_system_config(request):
         })
         
     elif request.method == 'POST':
+        # MANUAL CHECK: Only allow Coordinators to update the settings
+        if not request.user.groups.filter(name='Project_Coordinator').exists():
+            return JsonResponse({"error": "Only Project Coordinators can change settings."}, status=403)
         try:
-            data = json.loads(request.body)
+            data = json.requests.data
             new_limit = int(data.get('max_preferences', 3))
             
             # BULLETPROOF SINGLETON UPDATE:
@@ -273,7 +293,8 @@ def get_system_config(request):
 
     return JsonResponse({"status": "error", "message": "Invalid method"}, status=405)
 
-@csrf_exempt
+@api_view(['POST'])
+@permission_classes([IsStudent])
 def suggest_supervisors_api(request):
     """
     On-the-fly AI recommendation endpoint for the Two-Stage Wizard.
@@ -281,7 +302,7 @@ def suggest_supervisors_api(request):
     """
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)
+            data = json.reuqest.data
             
             # STEP 1: Extract the incoming text
             topic = data.get('topic', '')
@@ -335,6 +356,8 @@ def suggest_supervisors_api(request):
             
     return JsonResponse({"status": "error", "message": "Invalid method"}, status=405)
 
+@api_view(['GET'])
+@permission_classes([IsSupervisor])
 def get_supervisor_students_api(request, supervisor_name):
     """
     Fetches all students permanently allocated to a specific supervisor.
@@ -354,8 +377,8 @@ def get_supervisor_students_api(request, supervisor_name):
                     "name": s.name,
                     "topic": s.topic_description,
                     "interests": ", ".join(s.student_research_interests) if s.student_research_interests else "None listed",
-                    "languages": ", ".join(s.programming_languages) if s.programming_languages else "None listed",
-                    "category": ", ".join(s.project_category) if s.project_category else "None listed",
+                    "skills": ", ".join(s.technicalskills) if s.technical_skills else "None listed",
+                    "project_format": ", ".join(s.primary_project_format) if s.primary_project_format else "None listed",
                 })
                 
             return JsonResponse({
@@ -372,6 +395,8 @@ def get_supervisor_students_api(request, supervisor_name):
             
     return JsonResponse({"status": "error", "message": "Invalid method"}, status=405)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_all_supervisors_api(request):
     """Fetches a public directory of all available supervisors for the students to browse."""
     if request.method == 'GET':
@@ -387,7 +412,7 @@ def get_all_supervisors_api(request):
                     "interests": sup.research_interests or [],
                     # Using getattr as a safety net for the new fields we added
                     "suggested_projects": getattr(sup, 'suggested_projects', []),
-                    "categories": getattr(sup, 'project_categories', []),
+                    "primary_project_format": getattr(sup, 'primary_project_format', []),
                     "capacity": sup.capacity
                 })
                 
@@ -397,6 +422,8 @@ def get_all_supervisors_api(request):
             
     return JsonResponse({"status": "error", "message": "Invalid method"}, status=405)
     
+ @api_view(['GET'])
+ @permission_classes([IsProjectCoordinator])   
 def export_allocations_csv(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="final_allocations.csv"'

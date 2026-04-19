@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views 
+from .views import CustomTokenObtainPairView
 
 urlpatterns = [ 
     path('run-algo/', views.run_allocation_algorithm, name='run_allocation'), 
@@ -11,5 +12,6 @@ urlpatterns = [
     path('supervisor-profile/<str:supervisor_name>/', views.get_supervisor_profile_api, name='supervisor_profile'),
     path('directory/', views.get_all_supervisors_api, name='supervisor_directory'),
     path('export-csv/', views.export_allocations_csv, name='export_csv'),
+    path('api/login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
 
 ]
