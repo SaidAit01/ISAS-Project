@@ -39,9 +39,7 @@ const SupervisorDirectory = () => {
                     <h2 className="fw-bold text-dark mb-1">📚 Academic Staff Directory</h2>
                     <p className="text-muted mb-0">Browse available supervisors and their research interests.</p>
                 </div>
-                <Link to="/add-student" className="btn btn-primary fw-bold">
-                    ✨ Submit your Proposal
-                </Link>
+ 
             </div>
 
             {/* LIVE SEARCH BAR */}

@@ -58,11 +58,37 @@ const ResultsTable = ({ matched, unallocated, pending }) => {
                     <p className="mb-2 mt-2">
                         The following students could not be matched due to capacity limits. Manual intervention required:
                     </p>
-                    <ul className="mb-0">
-                        {unallocated.map((studentName, idx) => (
-                            <li key={idx} className="fw-bold">{studentName}</li>
-                        ))}
-                    </ul>
+                    <ul className="mb-0 list-unstyled">
+                {unallocated.map((student, idx) => (
+                    <li key={idx} className="mb-3 p-3 bg-white rounded border border-danger shadow-sm">
+                        <span className="fw-bold text-danger fs-5">{student.name}</span>
+                        
+                        <div className="text-dark mt-2 mb-2" style={{ fontSize: "0.95rem" }}>
+                            <strong>Topic:</strong> <span className={student.topic === "No specific topic provided." ? "text-muted font-italic" : ""}>{student.topic}</span>
+                        </div>
+                        
+                        {/* Render Skills Badges if they exist */}
+                        {student.skills && student.skills.length > 0 && (
+                            <div className="mb-1">
+                                <strong className="small text-muted text-uppercase me-2">Skills:</strong>
+                                {student.skills.map((skill, s_idx) => (
+                                    <span key={s_idx} className="badge bg-secondary me-1">{skill}</span>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Render Format Badges if they exist */}
+                        {student.format && student.format.length > 0 && (
+                            <div>
+                                <strong className="small text-muted text-uppercase me-2">Format:</strong>
+                                {student.format.map((fmt, f_idx) => (
+                                    <span key={f_idx} className="badge bg-light text-dark border border-secondary me-1">{fmt}</span>
+                                ))}
+                            </div>
+                        )}
+                    </li>
+                ))}
+            </ul>
                 </div>
             )}
 

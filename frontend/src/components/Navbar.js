@@ -1,7 +1,18 @@
 import React from 'react';
-import { Link } from 'react-router-dom'; // 'Link' replaces HTML <a> tags
+import { Link, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
+    const navigate = useNavigate();
+    
+    // Check if the user is currently logged in
+    const token = localStorage.getItem('access_token');
+
+    // Handle the logout process
+    const handleLogout = () => {
+        localStorage.removeItem('access_token');
+        navigate('/login');
+    };
+
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
             <div className="container">
@@ -10,16 +21,15 @@ const Navbar = () => {
                     <span className="navbar-toggler-icon"></span>
                 </button>
                 <div className="collapse navbar-collapse" id="navbarNav">
-                    <ul className="navbar-nav ms-auto">
+                    <ul className="navbar-nav ms-auto align-items-center">
                         <li className="nav-item">
                             <Link className="nav-link" to="/">Home</Link>
                         </li>
                         <li className="nav-item">
                             <Link className="nav-link" to="/allocation">Allocation Dashboard</Link>
                         </li>
-
                         <li className="nav-item">
-                            <Link className="nav-link text-warning fw-bold" to="/add-student"> Student Proposal Submission</Link>
+                            <Link className="nav-link" to="/add-student"> Student Proposal</Link>
                         </li>
                         <li className="nav-item">
                             <Link className="nav-link" to="/supervisor">Supervisor Portal</Link>
@@ -28,6 +38,20 @@ const Navbar = () => {
                             <Link className="nav-link" to="/directory">Browse Supervisors</Link>
                         </li>
 
+                        {/* --- THE DYNAMIC AUTH BUTTON --- */}
+                        {token ? (
+                            <li className="nav-item ms-3">
+                                <button onClick={handleLogout} className="btn btn-outline-danger btn-sm fw-bold">
+                                    Log Out
+                                </button>
+                            </li>
+                        ) : (
+                            <li className="nav-item ms-3">
+                                <Link className="btn btn-primary btn-sm fw-bold px-4" to="/login">
+                                    Log In
+                                </Link>
+                            </li>
+                        )}
                     </ul>
                 </div>
             </div>

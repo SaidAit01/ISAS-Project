@@ -18,7 +18,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
 @api_view(['POST'])
-@permission_classes([IsProjectCoordinator]
+@permission_classes([IsProjectCoordinator])
 def run_allocation_algorithm(request):
     # 1. Fetch Data
     supervisors = list(SupervisorProfile.objects.all())
@@ -95,9 +95,26 @@ def run_allocation_algorithm(request):
         algo_matched = algo_matches.get('matched', {})
         for sup_name, allocated_names in algo_matched.items():
             final_matches['matched'][sup_name].extend(allocated_names)
-                
-        final_matches['unallocated'].extend(algo_matches.get('unallocated', []))
 
+            # Grab the names of the unallocated students from the algorithm
+        unallocated_names = algo_matches.get('unallocated', [])
+        
+        # Loop through them and extract their full profile
+        for name in unallocated_names:
+            student_obj = next((s for s in standard_students if s.name == name), None)
+            
+            # Safely extract data, providing fallbacks if missing
+            topic = student_obj.topic_description if student_obj and student_obj.topic_description else "No specific topic provided."
+            skills = student_obj.technical_skills if student_obj else []
+            project_format = student_obj.primary_project_format if student_obj else []
+            
+            final_matches['unallocated'].append({
+                "name": name,
+                "topic": topic,
+                "skills": skills,
+                "format": project_format
+            })
+                                  
     # ==========================================
     # PERMANENTLY SAVE TO DATABASE
     # ==========================================
@@ -164,10 +181,17 @@ def add_student_api(request):
                     "status": "error", 
                     "message": f"Module Leader constraint: You are only allowed a maximum of {word_limit} manual preferences."
                 }, status=400)
+                
+            has_pre_agreement = data.get('has_pre_agreement', False)
+            pre_agreed_name = data.get('pre_agreed_supervisor', '')
+            pre_agreed_obj = None
             
-            # 3. THE UPSERT FIX: UPDATE OR CREATE
-            # Django looks for this specific 'name'.
-            # If found, it overwrites with the 'defaults'. If not, it creates a new record.
+            if has_pre_agreement and pre_agreed_name:
+                try:
+                    pre_agreed_obj = SupervisorProfile.objects.get(name=pre_agreed_name)
+                except SupervisorProfile.DoesNotExist:
+                    pass # Fails gracefully if name is wrong
+
             student, created = StudentProposal.objects.update_or_create(
                 name=data.get('name'), 
                 defaults={
@@ -197,7 +221,7 @@ def add_supervisor_api(request):
     """Upsert endpoint for Supervisors to create or update their profile from React."""
     if request.method == 'POST':
         try:
-            data = json.requrests.data
+            data = json.request.data
             
             # Use update_or_create to prevent duplicates!
             supervisor, created = SupervisorProfile.objects.update_or_create(
@@ -263,7 +287,7 @@ def get_system_config(request):
         if not request.user.groups.filter(name='Project_Coordinator').exists():
             return JsonResponse({"error": "Only Project Coordinators can change settings."}, status=403)
         try:
-            data = json.requests.data
+            data = json.request.data
             new_limit = int(data.get('max_preferences', 3))
             
             # BULLETPROOF SINGLETON UPDATE:
@@ -377,7 +401,7 @@ def get_supervisor_students_api(request, supervisor_name):
                     "name": s.name,
                     "topic": s.topic_description,
                     "interests": ", ".join(s.student_research_interests) if s.student_research_interests else "None listed",
-                    "skills": ", ".join(s.technicalskills) if s.technical_skills else "None listed",
+                    "skills": ", ".join(s.technical_skills) if s.technical_skills else "None listed",
                     "project_format": ", ".join(s.primary_project_format) if s.primary_project_format else "None listed",
                 })
                 
@@ -422,8 +446,8 @@ def get_all_supervisors_api(request):
             
     return JsonResponse({"status": "error", "message": "Invalid method"}, status=405)
     
- @api_view(['GET'])
- @permission_classes([IsProjectCoordinator])   
+@api_view(['GET'])
+@permission_classes([IsProjectCoordinator])   
 def export_allocations_csv(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="final_allocations.csv"'
