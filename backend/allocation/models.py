@@ -1,13 +1,11 @@
 from django.db import models
 
-
-# models containd the essentisl fields and behaviour of the data
 class SupervisorProfile(models.Model) : 
     name = models.CharField(max_length=100)
     research_interests = models.JSONField(default=list) 
     suggested_projects = models.JSONField(default=list)
     required_skills = models.JSONField(default=list)
-    primary_project_format = models.JSONField(default=list)
+    project_category = models.JSONField(default=list) # RENAMED
     capacity = models.IntegerField(default=5)
 
     def __str__(self):
@@ -18,11 +16,10 @@ class StudentProposal(models.Model):
     topic_description = models.TextField()
     student_research_interests = models.JSONField(default=list)
     technical_skills = models.JSONField(default=list)
-    primary_project_format = models.JSONField(default=list)
+    project_category = models.JSONField(default=list)
     manual_preferences = models.JSONField(default=list)
     has_submitted = models.BooleanField(default=False)
     
-    # Existing allocation field (where the algorithm puts its final answers)
     allocated_supervisor = models.ForeignKey(
         'SupervisorProfile', 
         on_delete=models.SET_NULL, 
@@ -50,11 +47,28 @@ class SystemConfiguration (models.Model) :
         help_text="Maximum number of manual preferences a student can submit"
     )
     def save(self, *args, **kwargs): 
-        self.pk = 1 # Ensure only one instance exists
+        self.pk = 1 
         super().save(*args, **kwargs)
     def delete(self, *args, **kwargs):
-        pass # prevent the module leader from accidentally deleting the settings.
+        pass 
     class Meta:
-        # This make it look tidy in the admin panel ( removes the pluaral 's')
         verbose_name = "System Configuration"
         verbose_name_plural = "System Configuration"
+
+class ProjectCategory(models.Model):
+    name = models.CharField(max_length=150, unique=True)
+    
+    def __str__(self):
+        return self.name
+
+class TechnicalSkill(models.Model):
+    name = models.CharField(max_length=150, unique=True)
+    
+    def __str__(self):
+        return self.name
+
+class ResearchInterest(models.Model):
+    name = models.CharField(max_length=150, unique=True)
+    
+    def __str__(self):
+        return self.name

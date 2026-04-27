@@ -13,5 +13,7 @@ urlpatterns = [
     path('directory/', views.get_all_supervisors_api, name='supervisor_directory'),
     path('export-csv/', views.export_allocations_csv, name='export_csv'),
     path('api/login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
-
+    path('taxonomies/', views.get_taxonomies_api, name='taxonomies'), # <-- ADDED THIS
+    # Add this line right below your other routes
+    path('update-capacity/', views.update_supervisor_capacity_api, name='update_capacity'),
 ]

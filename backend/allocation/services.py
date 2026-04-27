@@ -15,9 +15,9 @@ def calculate_hybrid_score(student, supervisor, sbert_score):
         skill_matches = student_skills.intersection(required_skills)
         skill_score = len(skill_matches) / len(required_skills)
         
-    student_categories = set(student.primary_project_format)
-    # CRITICAL FIX: Updated to match the new models.py column name!
-    suggested_categories = set(supervisor.primary_project_format)
+    # FIXED: Now correctly pointing to project_category
+    student_categories = set(student.project_category)
+    suggested_categories = set(supervisor.project_category)
     
     if len(suggested_categories) == 0:
         category_score = 1.0
@@ -61,4 +61,3 @@ def calculate_academic_fit(students, supervisors):
         final_matrix.append(student_scores)
         
     return np.array(final_matrix)
-    
