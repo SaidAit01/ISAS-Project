@@ -72,7 +72,7 @@ const Home = () => {
                     <div className="card h-100 shadow-sm border-0 bg-white">
                         <div className="card-body text-center p-5 d-flex flex-column">
                             <div className="display-6 mb-3">⚙️</div>
-                            <h3 className="card-title text-success fw-bold mb-3">Module Leader Admin</h3>
+                            <h3 className="card-title text-success fw-bold mb-3">Project Coordinator Portal</h3>
                             <p className="card-text text-muted mb-4">
                                 Central control for project administrators. Enforce capacity constraints, monitor pending submissions, and execute the final allocation engine.
                             </p>
